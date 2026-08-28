@@ -12,12 +12,12 @@
 - **Problem 2.1:** React state operates like a immutable snapshot tied to a specific render cycle, whereas refs are mutable references. Explain the operational consequences this difference creates when trying to read values inside asynchronous closures like `setTimeout` or `setInterval`.
 - **Problem 2.2:** Consider the internal mental model of React where `useRef` is built on top of `useState`:JavaScript
     
-    ```jsx
+    ~~~jsx
     function useRef(initialValue){
       const [ref, unusedSetter] = useState({ current: initialValue });
       return ref;
     }
-    ```
+    ~~~
     
     Why does this implementation preserve mutations across renders without ever needing to call `unusedSetter`? Focus your explanation on JavaScript object reference identities.
     
@@ -33,7 +33,7 @@ Study the component code below. Trace the exact values that will be logged to th
 
 
 
-```JavaScript
+```jsx
 import { useState, useRef } from 'react';
 
 export default function TargetCounter(){
@@ -72,7 +72,7 @@ Analyze the following stopwatch implementation. Predict what happens when a user
 
 
 
-```JavaScript
+```jsx
 import { useState, useRef } from 'react';
 
 export default function CaptureSnapshot(){
@@ -109,7 +109,7 @@ The toggle button component below is intended to swap CSS layout themes between 
 
 
 
-```JavaScript
+```jsx
 import { useRef } from 'react';
 
 export default function ThemeSwitcher(){
@@ -136,7 +136,7 @@ Identify why the module-scoped variable creates cross-contamination, and refacto
 
 
 
-```JavaScript
+```jsx
 import { useState } from 'react';
 
 // Intentional Structural System Bug: Global variable shared between instances
@@ -179,7 +179,7 @@ Build a self-contained component named `InactivityGuard` that acts as a secure s
 
 
 
-```JavaScript
+```jsx
 // Starter Code
 import { useState, useRef } from 'react';
 
@@ -213,7 +213,7 @@ The telemetry tracking component below monitors how long a machine operates. You
 
 
 
-```JavaScript
+```jsx
 // Starter Code - Modify this structure
 import { useState, useRef } from 'react';
 
@@ -262,9 +262,9 @@ export default function TelemetryDashboard(){
 - **Problem 7.1:** React's `StrictMode` deliberately double-invokes component functions in development environments to catch hidden side effects. If a developer breaks best-practice patterns by mutating a ref directly inside the render block (e.g., `myRef.current++` inside the component body), how does this double-invocation affect the accuracy of the ref's stored value?
 - **Problem 7.2:** Consider the following instantiation pattern designed to hold an expensive object architecture inside a component:
     
-    ```JavaScript
+    ~~~jsx
     const heavyEngineRef = useRef(new DeepAnalyticalEngine());
-    ```
+    ~~~
     
     - Explain why this syntax performs poorly, specifically highlighting what happens to the `new DeepAnalyticalEngine()` constructor execution on subsequent component re-renders.
     - Refactor this initialization step using the defensive "lazy initialization pattern" inside a conditional rendering branch to ensure the constructor executes exactly once during the initial mount phase.
@@ -301,7 +301,7 @@ You are tasked with building a complex files-staging panel for a cloud platform.
 
 
 
-```JavaScript
+```jsx
 // Starter Layout Architecture
 import { useState, useRef } from 'react';
 

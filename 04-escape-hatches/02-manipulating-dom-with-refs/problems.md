@@ -21,7 +21,7 @@ Study the component setup below. Trace the exact visual and programmatic events 
 
 
 
-```JavaScript
+```jsx
 import { useState, useRef } from 'react';
 
 export default function CommentThread(){
@@ -63,7 +63,7 @@ Analyze the component design below. Determine what happens when a parent dashboa
 
 
 
-```JavaScript
+```jsx
 import { useRef, useImperativeHandle } from 'react';
 
 function SecureMediaTerminal({ ref }){
@@ -117,7 +117,7 @@ Locate the breakdown in the component property routing contract, explain why it 
 
 
 
-```JavaScript
+```jsx
 // --- App.js ---
 import { useRef } from 'react';
 import CustomInputField from './CustomInputField.js';
@@ -157,7 +157,7 @@ Identify the breakdown between direct DOM manipulation and state tracking, and r
 
 
 
-```JavaScript
+```jsx
 import { useState, useRef } from 'react';
 
 export default function NotificationCenter(){
@@ -200,7 +200,7 @@ Build an One-Time Password (OTP) validation module containing 4 sequential input
 
 
 
-```JavaScript
+```jsx
 // Starter Code Structure
 import { useState, useRef } from 'react';
 
@@ -243,7 +243,7 @@ The message room component below updates state smoothly, but forcing the viewpor
 
 
 
-```JavaScript
+```jsx
 // Starter Code - Modify this structure
 import { useState, useRef } from 'react';
 import { flushSync } from 'react-dom';
@@ -317,7 +317,7 @@ You are building an interactive reader application dashboard that contains a lon
 
 
 
-```JavaScript
+```jsx
 // Starter Layout Architecture
 import { useState, useRef, useImperativeHandle } from 'react';
 

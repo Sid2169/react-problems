@@ -22,7 +22,7 @@ Analyze the following code. How many times will the console log `"Rendering User
 
 
 
-```JavaScript
+```jsx
 function UserProfile({ firstName, lastName }){
   console.log("Rendering UserProfile");
   const [fullName, setFullName] = useState("");
@@ -41,7 +41,7 @@ Predict the exact sequence of console logs when the user clicks the "Increment" 
 
 
 
-```JavaScript
+```jsx
 function Counter(){
   const [count, setCount] = useState(0);
   const double = count * 2;
@@ -68,7 +68,7 @@ Predict what will happen in the network tab when this component mounts in a mode
 
 
 
-```JavaScript
+```jsx
 function App(){
   useEffect(() => {
     fetch('/api/track-app-open', { method: 'POST' });
@@ -86,7 +86,7 @@ This component attempts to display a list of active users. Identify the performa
 
 
 
-```JavaScript
+```jsx
 function ActiveUsersList({ users }){
   const [activeUsers, setActiveUsers] = useState([]);
 
@@ -109,7 +109,7 @@ A developer complains that when a user refreshes the page on an item that is alr
 
 
 
-```JavaScript
+```jsx
 function ProductCard({ product, addToCart }){
   useEffect(() => {
     if (product.isInCart) {
@@ -131,7 +131,7 @@ This setup creates a confusing data flow where the child dictates state to the p
 
 
 
-```JavaScript
+```jsx
 function ParentDashboard(){
   const [userSettings, setUserSettings] = useState(null);
   return (
@@ -189,7 +189,7 @@ Refactor the following multi-step form logic to entirely remove the `useEffect` 
 
 
 
-```JavaScript
+```jsx
 function OnboardingWizard(){
   const [step, setStep] = useState(1);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -224,7 +224,7 @@ Refactor the following code. Currently, it attempts to sync the selected object 
 
 
 
-```JavaScript
+```jsx
 function DataGrid({ rows }){
   const [selectedRow, setSelectedRow] = useState(null);
 
@@ -250,7 +250,7 @@ In this component, an Effect is being used to trigger a save operation whenever 
 
 
 
-```JavaScript
+```jsx
 function DocumentEditor({ docId, initialContent }){
   const [content, setContent] = useState(initialContent);
   const [isDirty, setIsDirty] = useState(false);
@@ -298,7 +298,7 @@ You are tasked with building a `ProductExplorer` component for an e-commerce ent
 
 
 
-```JavaScript
+```jsx
 // Starter Code
 export default function ProductExplorer({ inventory, category, onProductSelect }){
   // Implement robust, Effect-free architecture here
@@ -319,7 +319,7 @@ Design a `PlaylistPlayer` component that manages playback state and synchronizes
 
 
 
-```JavaScript
+```jsx
 // Starter Code
 export default function PlaylistPlayer({ playlist, currentTrackIndex, onIndexChange }){
   const audioRef = useRef(null);
