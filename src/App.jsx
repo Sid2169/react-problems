@@ -8,10 +8,14 @@ import {
   ChevronRight, 
   Layers, 
   CheckCircle2, 
+  Circle,
   AlertTriangle,
   RefreshCw,
   BookOpen,
-  Box
+  Box,
+  Copy,
+  Check,
+  PlusCircle
 } from 'lucide-react';
 
 // Robust Error Boundary to catch render-time errors in solution components
@@ -58,14 +62,16 @@ class ComponentErrorBoundary extends Component {
   }
 }
 
-// Auto-discover all Solution.jsx files anywhere in the repo (relative to src/)
-const rawModules = import.meta.glob(
+// 1. Discover all existing problem topics across the entire repository
+const allProblemFiles = import.meta.glob('../0*/**/problems.md', { eager: true, query: '?raw' });
+
+// 2. Discover all Solution.jsx files
+const rawSolutionModules = import.meta.glob(
   [
     '../01-describing-ui/**/[sS]olution*.{jsx,tsx}',
     '../02-adding-interactivity/**/[sS]olution*.{jsx,tsx}',
     '../03-managing-state/**/[sS]olution*.{jsx,tsx}',
-    '../04-escape-hatches/**/[sS]olution*.{jsx,tsx}',
-    '../**/[sS]olution*.{jsx,tsx}'
+    '../04-escape-hatches/**/[sS]olution*.{jsx,tsx}'
   ],
   { eager: true }
 );
@@ -78,72 +84,105 @@ function formatTitle(str) {
     .join(' ');
 }
 
-function parseModulePath(path) {
-  // Format: ../01-describing-ui/01-first-component/Solution.jsx
+function parseTopicPath(path) {
+  // Format: ../01-describing-ui/01-first-component/problems.md
   const cleanPath = path.replace(/^(\.\.\/|\.\/)/, '');
   const parts = cleanPath.split('/');
   if (parts.length < 3) return null;
 
   const categoryDir = parts[0];
   const topicDir = parts[1];
-  const filename = parts[parts.length - 1];
 
   const categoryName = categoryDir.replace(/^\d+-/, '').split('-').map(w => w.toUpperCase()).join(' ');
   const topicName = formatTitle(topicDir);
 
   return {
-    rawPath: cleanPath,
     categoryDir,
     categoryName,
     topicDir,
     topicName,
-    filename
+    relTopicPath: `${categoryDir}/${topicDir}`
   };
 }
 
 export default function App() {
-  // Organize solutions by category and topic
-  const solutionTree = useMemo(() => {
-    const categories = {};
+  const [copied, setCopied] = useState(false);
 
-    Object.keys(rawModules).forEach(path => {
-      const parsed = parseModulePath(path);
+  // Organize full directory tree of all 31 topics
+  const { categoryList, totalTopics, totalSolved } = useMemo(() => {
+    const categoriesMap = {};
+    let solvedCount = 0;
+
+    // Index solution modules by relative topic path e.g. "01-describing-ui/01-first-component"
+    const solutionMap = {};
+    Object.keys(rawSolutionModules).forEach(solPath => {
+      const cleanPath = solPath.replace(/^(\.\.\/|\.\/)/, '');
+      const parts = cleanPath.split('/');
+      if (parts.length >= 3) {
+        const key = `${parts[0]}/${parts[1]}`;
+        solutionMap[key] = {
+          solPath,
+          mod: rawSolutionModules[solPath]
+        };
+      }
+    });
+
+    // Parse all problem topics
+    const problemPaths = Object.keys(allProblemFiles).sort();
+    
+    problemPaths.forEach(probPath => {
+      const parsed = parseTopicPath(probPath);
       if (!parsed) return;
 
-      const { categoryDir, categoryName, topicDir, topicName } = parsed;
-      const mod = rawModules[path];
+      const { categoryDir, categoryName, topicDir, topicName, relTopicPath } = parsed;
+      const solutionMatch = solutionMap[relTopicPath];
+      const isSolved = !!solutionMatch;
 
-      // Filter exported components from module
+      if (isSolved) solvedCount++;
+
       const exports = [];
-      Object.keys(mod).forEach(exportName => {
-        const exportedItem = mod[exportName];
-        if (typeof exportedItem === 'function') {
-          exports.push({
-            name: exportName === 'default' ? 'Default Component (Main)' : exportName,
-            isDefault: exportName === 'default',
-            component: exportedItem
-          });
-        }
-      });
+      let notes = null;
 
-      if (!categories[categoryDir]) {
-        categories[categoryDir] = {
+      if (isSolved) {
+        const mod = solutionMatch.mod;
+        Object.keys(mod).forEach(exportName => {
+          const exportedItem = mod[exportName];
+          if (typeof exportedItem === 'function') {
+            exports.push({
+              name: exportName === 'default' ? 'Default Component (Main)' : exportName,
+              isDefault: exportName === 'default',
+              component: exportedItem
+            });
+          }
+        });
+        notes = mod.answers || mod.notes || mod.metadata || null;
+      }
+
+      if (!categoriesMap[categoryDir]) {
+        categoriesMap[categoryDir] = {
           name: categoryName,
           dir: categoryDir,
           topics: []
         };
       }
 
-      categories[categoryDir].topics.push({
+      categoriesMap[categoryDir].topics.push({
         dir: topicDir,
         name: topicName,
-        path,
+        relTopicPath,
+        solutionPath: isSolved ? solutionMatch.solPath : `${relTopicPath}/Solution.jsx`,
+        isSolved,
         exports,
-        notes: mod.answers || mod.notes || mod.metadata || null
+        notes
       });
     });
 
-    return Object.values(categories);
+    const categoryList = Object.values(categoriesMap);
+    return {
+      categoryList,
+      totalTopics: problemPaths.length,
+      totalSolved: solvedCount
+    };
   }, []);
 
   // Active selection states
@@ -153,32 +192,64 @@ export default function App() {
 
   // Default selection on load
   useEffect(() => {
-    if (solutionTree.length > 0) {
-      const firstCat = solutionTree[0];
+    if (categoryList.length > 0) {
+      const firstCat = categoryList[0];
       setSelectedCategory(firstCat.dir);
       if (firstCat.topics.length > 0) {
         const firstTopic = firstCat.topics[0];
-        setSelectedTopic(firstTopic.path);
+        setSelectedTopic(firstTopic.relTopicPath);
         if (firstTopic.exports.length > 0) {
           setSelectedExport(firstTopic.exports[0].name);
         }
       }
     }
-  }, [solutionTree]);
+  }, [categoryList]);
 
   const activeCategoryObj = useMemo(() => {
-    return solutionTree.find(c => c.dir === selectedCategory);
-  }, [solutionTree, selectedCategory]);
+    return categoryList.find(c => c.dir === selectedCategory);
+  }, [categoryList, selectedCategory]);
 
   const activeTopicObj = useMemo(() => {
     if (!activeCategoryObj) return null;
-    return activeCategoryObj.topics.find(t => t.path === selectedTopic);
+    return activeCategoryObj.topics.find(t => t.relTopicPath === selectedTopic);
   }, [activeCategoryObj, selectedTopic]);
 
   const activeExportObj = useMemo(() => {
-    if (!activeTopicObj) return null;
+    if (!activeTopicObj || !activeTopicObj.isSolved) return null;
     return activeTopicObj.exports.find(e => e.name === selectedExport) || activeTopicObj.exports[0];
   }, [activeTopicObj, selectedExport]);
+
+  const handleCopyTemplate = (relPath) => {
+    const template = `import React from 'react';
+
+/**
+ * Solution for ${relPath}
+ */
+
+// Exercise 5.1: Named Export
+export function Exercise5_1() {
+  return (
+    <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '8px' }}>
+      <h3>Exercise 5.1 Solution</h3>
+    </div>
+  );
+}
+
+// Main Challenge: Default Export
+export default function MainSolution() {
+  return (
+    <div style={{ padding: '20px', background: '#e0e7ff', borderRadius: '8px' }}>
+      <h2>Main Challenge Solution</h2>
+    </div>
+  );
+}
+`;
+    navigator.clipboard.writeText(template);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const progressPercent = Math.round((totalSolved / (totalTopics || 1)) * 100);
 
   return (
     <div className="workbench-layout">
@@ -190,14 +261,17 @@ export default function App() {
           </div>
           <div>
             <h1>React Problems Workbench</h1>
-            <p className="subtitle">Single-File Solution Runner & Auto-Discovery</p>
+            <p className="subtitle">Interactive Solution Runner & Progress Tracker</p>
           </div>
         </div>
 
         <div className="header-meta">
+          <div className="progress-bar-container">
+            <div className="progress-fill" style={{ width: `${progressPercent}%` }}></div>
+          </div>
           <div className="stat-chip">
             <Box size={14} />
-            <span>{solutionTree.flatMap(c => c.topics).length} Solutions Found</span>
+            <span>{totalSolved} / {totalTopics} Topics Solved ({progressPercent}%)</span>
           </div>
         </div>
       </header>
@@ -207,58 +281,64 @@ export default function App() {
         <aside className="workbench-sidebar">
           <div className="sidebar-section-title">
             <BookOpen size={14} />
-            <span>CATEGORIES</span>
+            <span>ALL TOPICS ({totalTopics})</span>
           </div>
 
           <nav className="nav-categories">
-            {solutionTree.map(cat => (
-              <div key={cat.dir} className="category-group">
-                <button
-                  className={`category-btn ${selectedCategory === cat.dir ? 'active' : ''}`}
-                  onClick={() => {
-                    setSelectedCategory(cat.dir);
-                    if (cat.topics.length > 0) {
-                      setSelectedTopic(cat.topics[0].path);
-                      if (cat.topics[0].exports.length > 0) {
-                        setSelectedExport(cat.topics[0].exports[0].name);
+            {categoryList.map(cat => {
+              const catSolvedCount = cat.topics.filter(t => t.isSolved).length;
+              return (
+                <div key={cat.dir} className="category-group">
+                  <button
+                    className={`category-btn ${selectedCategory === cat.dir ? 'active' : ''}`}
+                    onClick={() => {
+                      setSelectedCategory(cat.dir);
+                      if (cat.topics.length > 0) {
+                        const nextTopic = cat.topics[0];
+                        setSelectedTopic(nextTopic.relTopicPath);
+                        if (nextTopic.exports.length > 0) {
+                          setSelectedExport(nextTopic.exports[0].name);
+                        } else {
+                          setSelectedExport(null);
+                        }
                       }
-                    }
-                  }}
-                >
-                  <Folder size={16} />
-                  <span className="cat-name">{cat.name}</span>
-                  <span className="cat-badge">{cat.topics.length}</span>
-                </button>
+                    }}
+                  >
+                    <Folder size={16} />
+                    <span className="cat-name">{cat.name}</span>
+                    <span className={`cat-badge ${catSolvedCount > 0 ? 'badge-solved' : ''}`}>
+                      {catSolvedCount}/{cat.topics.length}
+                    </span>
+                  </button>
 
-                {selectedCategory === cat.dir && (
-                  <div className="topics-list">
-                    {cat.topics.map(topic => (
-                      <button
-                        key={topic.path}
-                        className={`topic-btn ${selectedTopic === topic.path ? 'active' : ''}`}
-                        onClick={() => {
-                          setSelectedTopic(topic.path);
-                          if (topic.exports.length > 0) {
-                            setSelectedExport(topic.exports[0].name);
-                          }
-                        }}
-                      >
-                        <FileCode size={14} />
-                        <span>{topic.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {solutionTree.length === 0 && (
-              <div className="empty-sidebar-notice">
-                <AlertTriangle size={18} />
-                <p>No `Solution.jsx` files found yet.</p>
-                <small>Create `Solution.jsx` inside any problem directory to see it here!</small>
-              </div>
-            )}
+                  {selectedCategory === cat.dir && (
+                    <div className="topics-list">
+                      {cat.topics.map(topic => (
+                        <button
+                          key={topic.relTopicPath}
+                          className={`topic-btn ${selectedTopic === topic.relTopicPath ? 'active' : ''}`}
+                          onClick={() => {
+                            setSelectedTopic(topic.relTopicPath);
+                            if (topic.exports.length > 0) {
+                              setSelectedExport(topic.exports[0].name);
+                            } else {
+                              setSelectedExport(null);
+                            }
+                          }}
+                        >
+                          {topic.isSolved ? (
+                            <CheckCircle2 size={14} className="icon-solved" />
+                          ) : (
+                            <Circle size={14} className="icon-unsolved" />
+                          )}
+                          <span className="topic-text">{topic.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </nav>
         </aside>
 
@@ -272,65 +352,102 @@ export default function App() {
                   <span>{activeCategoryObj?.name}</span>
                   <ChevronRight size={14} />
                   <strong className="current-topic">{activeTopicObj.name}</strong>
+                  {activeTopicObj.isSolved ? (
+                    <span className="status-tag status-solved"><CheckCircle2 size={12} /> Solved</span>
+                  ) : (
+                    <span className="status-tag status-unsolved"><Circle size={12} /> Unsolved</span>
+                  )}
                 </div>
                 <div className="file-path-tag">
-                  <code>{activeTopicObj.path}</code>
+                  <code>./{activeTopicObj.solutionPath}</code>
                 </div>
               </div>
 
-              {/* Exercise / Component Selector Tabs */}
-              <div className="exports-bar">
-                <div className="exports-label">
-                  <Layers size={15} />
-                  <span>Exported Exercises:</span>
-                </div>
-                <div className="exports-tabs">
-                  {activeTopicObj.exports.map(exp => (
-                    <button
-                      key={exp.name}
-                      className={`tab-btn ${selectedExport === exp.name ? 'active' : ''}`}
-                      onClick={() => setSelectedExport(exp.name)}
-                    >
-                      <Play size={12} className="play-icon" />
-                      <span>{exp.name}</span>
-                    </button>
-                  ))}
-                  {activeTopicObj.exports.length === 0 && (
-                    <span className="no-exports-msg">No exported components found in this solution file.</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Render Canvas */}
-              <div className="preview-stage">
-                <div className="stage-header">
-                  <div className="stage-title">
-                    <CheckCircle2 size={16} className="text-success" />
-                    <span>Live Render Canvas — <strong>{selectedExport}</strong></span>
+              {activeTopicObj.isSolved ? (
+                <>
+                  {/* Exercise / Component Selector Tabs */}
+                  <div className="exports-bar">
+                    <div className="exports-label">
+                      <Layers size={15} />
+                      <span>Exported Exercises:</span>
+                    </div>
+                    <div className="exports-tabs">
+                      {activeTopicObj.exports.map(exp => (
+                        <button
+                          key={exp.name}
+                          className={`tab-btn ${selectedExport === exp.name ? 'active' : ''}`}
+                          onClick={() => setSelectedExport(exp.name)}
+                        >
+                          <Play size={12} className="play-icon" />
+                          <span>{exp.name}</span>
+                        </button>
+                      ))}
+                      {activeTopicObj.exports.length === 0 && (
+                        <span className="no-exports-msg">No exported components found in this solution file.</span>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <div className="stage-viewport">
-                  {activeExportObj?.component ? (
-                    <ComponentErrorBoundary resetKey={`${selectedTopic}-${selectedExport}`}>
-                      <div className="rendered-component-wrapper">
-                        {React.createElement(activeExportObj.component)}
+                  {/* Render Canvas */}
+                  <div className="preview-stage">
+                    <div className="stage-header">
+                      <div className="stage-title">
+                        <CheckCircle2 size={16} className="text-success" />
+                        <span>Live Render Canvas — <strong>{selectedExport}</strong></span>
                       </div>
-                    </ComponentErrorBoundary>
-                  ) : (
-                    <div className="empty-viewport">
-                      <Code2 size={32} />
-                      <p>Select an exercise component above to run its live output.</p>
+                    </div>
+
+                    <div className="stage-viewport">
+                      {activeExportObj?.component ? (
+                        <ComponentErrorBoundary resetKey={`${selectedTopic}-${selectedExport}`}>
+                          <div className="rendered-component-wrapper">
+                            {React.createElement(activeExportObj.component)}
+                          </div>
+                        </ComponentErrorBoundary>
+                      ) : (
+                        <div className="empty-viewport">
+                          <Code2 size={32} />
+                          <p>Select an exercise component above to run its live output.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Solution Notes / Text Answers if available */}
+                  {activeTopicObj.notes && (
+                    <div className="notes-card">
+                      <h3>Written / Conceptual Answers</h3>
+                      <pre>{JSON.stringify(activeTopicObj.notes, null, 2)}</pre>
                     </div>
                   )}
-                </div>
-              </div>
+                </>
+              ) : (
+                /* Unsolved Topic Starter Screen */
+                <div className="unsolved-card">
+                  <div className="unsolved-header">
+                    <PlusCircle size={32} className="text-accent" />
+                    <h2>Start Practicing: {activeTopicObj.name}</h2>
+                    <p>No <code>Solution.jsx</code> file found in <code>./{activeTopicObj.relTopicPath}/</code> yet.</p>
+                  </div>
 
-              {/* Solution Notes / Text Answers if available */}
-              {activeTopicObj.notes && (
-                <div className="notes-card">
-                  <h3>Written / Conceptual Answers</h3>
-                  <pre>{JSON.stringify(activeTopicObj.notes, null, 2)}</pre>
+                  <div className="unsolved-actions">
+                    <button
+                      className="btn-copy-template"
+                      onClick={() => handleCopyTemplate(activeTopicObj.relTopicPath)}
+                    >
+                      {copied ? <Check size={16} /> : <Copy size={16} />}
+                      <span>{copied ? 'Template Copied to Clipboard!' : 'Copy Starter Solution.jsx Template'}</span>
+                    </button>
+                  </div>
+
+                  <div className="unsolved-instructions">
+                    <h4>Steps to solve:</h4>
+                    <ol>
+                      <li>Create a new file named <strong><code>Solution.jsx</code></strong> inside <code>./{activeTopicObj.relTopicPath}/</code></li>
+                      <li>Paste the starter template or write your React component solutions.</li>
+                      <li>Save the file — this workbench will automatically detect it and render your live code!</li>
+                    </ol>
+                  </div>
                 </div>
               )}
             </div>
@@ -338,7 +455,7 @@ export default function App() {
             <div className="empty-state">
               <Sparkles size={48} />
               <h2>Welcome to React Practice Workbench</h2>
-              <p>Create a <code>Solution.jsx</code> file inside any topic folder to run your code!</p>
+              <p>Select any topic from the sidebar to start practicing!</p>
             </div>
           )}
         </main>
