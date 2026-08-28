@@ -23,7 +23,7 @@ For each of the following snippets, trace the code and predict the exact visual 
 
 
 
-```JavaScript
+```jsx
 function badge(){
   return <span className="badge">Active</span>;
 }
@@ -45,7 +45,7 @@ export default function UserCard(){
 
 
 
-```JavaScript
+```jsx
 export default function HeroBanner(){
   return
     <header className="hero">
@@ -61,7 +61,7 @@ export default function HeroBanner(){
 
 
 
-```JavaScript
+```jsx
 function Author(){
   return <p>By: Jane Doe</p>;
 }
@@ -94,7 +94,7 @@ A developer wrote the following file to display a product badge, but the applica
 
 
 
-```JavaScript
+```jsx
 // Buggy Starter Code
 function productBadge(){
   return
@@ -120,7 +120,7 @@ This component attempts to organize a sidebar by grouping its links into a local
 
 
 
-```JavaScript
+```jsx
 // Buggy Starter Code
 export default function Sidebar(){
 
@@ -175,7 +175,7 @@ The following component contains repetitive, hardcoded markup. Refactor it by ex
 
 
 
-```JavaScript
+```jsx
 // Legacy Monolithic Code
 export default function FeatureGrid(){
   return (
@@ -208,7 +208,7 @@ A developer coming from object-oriented programming attempted to encapsulate int
 
 
 
-```JavaScript
+```jsx
 // Legacy Nested Code
 export default function OrderSummary(){
 
@@ -247,7 +247,7 @@ export default function OrderSummary(){
     - How does React's rendering engine handle `return undefined;` or a function with no explicit return statement? Why is there a difference?
 2. **The Sibling Return Constraint:** Consider a component that attempts to return two sibling elements directly
     
-    ```JavaScript
+    ```jsx
     function TitleGroup(){
       return (
         <h1>Primary Title</h1>

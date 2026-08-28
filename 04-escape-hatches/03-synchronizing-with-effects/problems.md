@@ -24,7 +24,7 @@ Study the component below. Trace what happens during component execution, render
 
 
 
-```JavaScript
+```jsx
 import { useState, useEffect } from 'react';
 
 export default function AnalyticsTracker(){
@@ -50,7 +50,7 @@ Analyze the following component structure designed to manage chat rooms:
 
 
 
-```JavaScript
+```jsx
 import { useState, useEffect } from 'react';
 
 function createSocketConnection(roomId){
@@ -87,7 +87,7 @@ Locate the bug, explain why it leaks memory, and rewrite the component using pro
 
 
 
-```JavaScript
+```jsx
 import { useState, useEffect } from 'react';
 
 export default function WindowSizeMonitor(){
@@ -114,7 +114,7 @@ Identify why this approach fails when the component unmounts naturally, and refa
 
 
 
-```JavaScript
+```jsx
 import { useEffect, useRef } from 'react';
 
 export default function ModalDialog({ isOpen, children }){
@@ -148,7 +148,7 @@ Create a search component that queries an external API as the user types.
 
 
 
-```JavaScript
+```jsx
 // Starter Code
 import { useState, useEffect } from 'react';
 
@@ -190,7 +190,7 @@ The following `<ControlledVideoPlayer>` component receives an `isPlaying` prop a
 
 
 
-```JavaScript
+```jsx
 // Starter Code - Refactor and Complete
 import { useState, useRef, useEffect } from 'react';
 
@@ -269,7 +269,7 @@ You are tasked with building a real-time server diagnostics component that conne
 
 
 
-```JavaScript
+```jsx
 // Starter Skeleton
 import { useState, useEffect } from 'react';
 

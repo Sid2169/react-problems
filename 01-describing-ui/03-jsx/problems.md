@@ -87,22 +87,21 @@ export default function ContactForm() {
 
 11. **Refactor HTML to JSX:** You have been given the raw HTML snippet below. Refactor it into a valid JSX React component named `FeatureCard`.
 *Raw HTML:*
-```html
+~~~html
 <div class="card" tabindex="0">
   <svg stroke-width="1.5" viewBox="0 0 24 24">...</svg>
   <h3>Fast Performance</h3>
   <hr>
   <p>Our app loads in < 1 second.</p>
 </div>
-
-```
+~~~
 
 
 *Starter Code:*
 ```jsx
 export default function FeatureCard() {
   return (
-    // Add your refactored JSX here
+    <>{/* Add your refactored JSX here */}</>
   );
 }
 
@@ -124,7 +123,7 @@ How exactly must `viewBox`, `fill-rule`, and `aria-hidden` be written in JSX to 
 
 13. **The Dashboard Widget:** As a frontend developer, a designer hands you an HTML mockup for a user dashboard widget. Convert this exact structure into a functional React component named `DashboardWidget`. You must ensure 100% JSX compliance (single root, closed tags, camelCase) while keeping the exact visual hierarchy.
 *HTML Mockup to Convert:*
-```html
+~~~html
 <!-- Dashboard Widget -->
 <section class="widget-container">
   <header class="widget-header">
@@ -142,15 +141,14 @@ How exactly must `viewBox`, `fill-rule`, and `aria-hidden` be written in JSX to 
     </li>
   </ul>
 </section>
-
-```
+~~~
 
 
 *Starter Code:*
 ```jsx
 export default function DashboardWidget() {
   return (
-    // Implement the JSX translation here
+    <>{/* Implement the JSX translation here */}</>
   );
 }
 
