@@ -14,6 +14,8 @@ import {
   Play
 } from 'lucide-react';
 
+import { generateSolutionFromMd } from './utils/scaffolder.js';
+
 // Error Boundary for user solution components
 class ComponentErrorBoundary extends React.Component {
   constructor(props) {
@@ -55,7 +57,7 @@ class ComponentErrorBoundary extends React.Component {
 }
 
 // Auto-discover all problems.md and Solution.jsx files across all 31 topics
-const problemFiles = import.meta.glob('/0*/*-*/problems.md', { query: '?raw', import: 'default', eager: false });
+const problemFiles = import.meta.glob('/0*/*-*/problems.md', { query: '?raw', import: 'default', eager: true });
 const solutionFiles = import.meta.glob('/0*/*-*/Solution.jsx', { eager: true });
 const lowercaseSolutionFiles = import.meta.glob('/0*/*-*/solution.jsx', { eager: true });
 
@@ -202,49 +204,9 @@ export default function App() {
   }, [activeTopicObj, selectedExport]);
 
   const handleCopyTemplate = async (relPath, topicName) => {
-    const template = `import React, { useState, useEffect } from 'react';
-
-/**
- * -------------------------------------------------------------------
- * Solution for ${relPath} (${topicName})
- * -------------------------------------------------------------------
- */
-
-// Written Answers (Recall, Conceptual, Edge Cases)
-export const answers = {
-  recall: {
-    q1: "Answer to Question 1",
-    q2: "Answer to Question 2"
-  },
-  conceptual: {
-    q1: "Answer to Conceptual Question 1"
-  }
-};
-
-/**
- * Exercise Component
- */
-export function Exercise5_1() {
-  return (
-    <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-      <h3>Exercise 5.1 Solution</h3>
-      <p>Component logic for ${topicName} goes here.</p>
-    </div>
-  );
-}
-
-/**
- * Main Challenge Solution
- */
-export default function MainSolution() {
-  return (
-    <div style={{ padding: '20px', background: '#e0e7ff', color: '#3730a3', borderRadius: '8px' }}>
-      <h2>Real-World Challenge Solution</h2>
-      <p>Main practice output for ${topicName}.</p>
-    </div>
-  );
-}
-`;
+    const probKey = `/${relPath}/problems.md`;
+    const mdContent = problemFiles[probKey] || '';
+    const template = generateSolutionFromMd(mdContent, relPath);
     const success = await copyToClipboard(template);
     if (success) {
       setCopiedTemplate(true);
