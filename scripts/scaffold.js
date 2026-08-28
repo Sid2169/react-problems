@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import esbuild from 'esbuild';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -56,49 +57,104 @@ function matchTopic(inputArg) {
 }
 
 function parseProblemsMd(content, relTopicPath) {
-  const exportedComponents = [];
-  const seenNames = new Set();
+  const extractedBlocks = [];
+  const globalDeclaredNames = new Map(); // name -> count
 
   const codeBlockRegex = /```(?:jsx|javascript|js)?\n([\s\S]*?)\n```/g;
   let match;
+  let blockIndex = 0;
 
   while ((match = codeBlockRegex.exec(content)) !== null) {
-    let code = match[1];
+    let rawCode = match[1];
 
-    // Remove inline import statements from code block
-    code = code.replace(/import\s+.*?from\s+['"].*?['"];?/g, '').trim();
+    // Strip inline import statements
+    let code = rawCode.replace(/import\s+.*?from\s+['"].*?['"];?/g, '').trim();
 
-    // Look for function declarations e.g. function ComponentName
-    const funcMatches = [...code.matchAll(/function\s+([A-Z]\w*)/g)];
-    
-    if (funcMatches.length > 0) {
-      funcMatches.forEach(m => {
-        const compName = m[1];
-        if (!seenNames.has(compName)) {
-          seenNames.add(compName);
-          
-          // Cleanly replace function declaration with export function
-          let exportedCode = code.replace(
-            new RegExp(`(export\\s+default\\s+)?(export\\s+)?function\\s+${compName}`),
-            `export function ${compName}`
-          );
+    // Sanitize intentional syntax errors in problem prompts (e.g. export default const -> const)
+    code = code.replace(/export\s+default\s+(const|let|var)\s+/g, '$1 ');
 
-          exportedComponents.push({
-            name: compName,
-            code: exportedCode
-          });
-        }
-      });
+    // Strip standalone export default / export { ... } statements
+    code = code.replace(/export\s+(?:default\s+)?(?:\{\s*[A-Za-z0-9_,\s]*\}|[A-Z]\w*);?/g, '').trim();
+
+    // Strip all leading export / export default keywords from declarations
+    code = code.replace(/export\s+(?:default\s+)?/g, '');
+
+    // Auto-close void HTML tags (<input>, <img>, <br>, <hr>)
+    code = code.replace(/<(input|img|br|hr|meta|link)([^>]*?)(?<!\/)>/gi, '<$1$2 />');
+
+    // Auto-fix unfragmented JSX returns in prompt snippets
+    code = code.replace(/return\s*\(\s*\n?(\s*<([A-Za-z0-9_]+)[\s\S]*?>[\s\S]*?<\/\2>\s*\n\s*<([A-Za-z0-9_]+)[\s\S]*?>[\s\S]*?<\/\3>[\s\S]*?)\s*\)/g, 'return (\n    <>\n      $1\n    </>\n  )');
+
+    if (!code) continue;
+
+    // Find all component function & arrow component declarations in this block
+    const funcMatches = [...code.matchAll(/(?:function|(?:const|let|var))\s+([A-Z]\w*)/g)];
+
+    if (funcMatches.length === 0) continue;
+
+    blockIndex++;
+    const blockDeclaredNames = [];
+
+    // Replace each function/component declaration sequentially to guarantee unique top-level names
+    funcMatches.forEach(m => {
+      const origName = m[1];
+      let uniqueName = origName;
+
+      if (globalDeclaredNames.has(origName)) {
+        const count = globalDeclaredNames.get(origName) + 1;
+        globalDeclaredNames.set(origName, count);
+        uniqueName = `${origName}_v${count}`;
+      } else {
+        globalDeclaredNames.set(origName, 1);
+      }
+
+      blockDeclaredNames.push(uniqueName);
+
+      if (uniqueName !== origName) {
+        // Replace exact function declaration
+        const regDecl = new RegExp(`\\b(function|(?:const|let|var))\\s+${origName}\\b`);
+        code = code.replace(regDecl, `$1 ${uniqueName}`);
+      }
+    });
+
+    // Ensure all component declarations have `export`
+    blockDeclaredNames.forEach((name) => {
+      const exportReg = new RegExp(`\\b(function|(?:const|let|var))\\s+${name}\\b`, 'g');
+      code = code.replace(exportReg, `export $1 ${name}`);
+    });
+
+    // Validate JS/JSX syntax using esbuild
+    let isValidJsx = true;
+    try {
+      esbuild.transformSync(code, { loader: 'jsx' });
+    } catch (e) {
+      isValidJsx = false;
     }
+
+    if (!isValidJsx) {
+      // If code snippet from problems.md had intentional invalid JSX syntax, comment it out safely with line comments
+      const safeRaw = rawCode.trim().split('\n').map(line => `// ${line}`).join('\n');
+      let safeCode = `// Intentional Debugging Exercise Snippet:\n${safeRaw}\n\n`;
+      blockDeclaredNames.forEach((name) => {
+        safeCode += `export function ${name}() {\n  return (\n    <div style={{ padding: '16px', background: '#fef2f2', border: '1px dashed #ef4444', borderRadius: '6px' }}>\n      <p><strong>${name}</strong> (Fix intentional prompt errors above)</p>\n    </div>\n  );\n}\n`;
+      });
+      code = safeCode;
+    }
+
+    extractedBlocks.push({
+      blockIndex,
+      declaredNames: blockDeclaredNames,
+      code
+    });
   }
 
   return {
     relTopicPath,
-    exportedComponents
+    extractedBlocks
   };
 }
 
-function generateSolutionContent({ relTopicPath, exportedComponents }) {
+function generateSolutionContent({ relTopicPath, extractedBlocks }) {
   let content = `import React, { useState, useEffect } from 'react';
 
 /**
@@ -116,19 +172,25 @@ export const answers = {
     q1: "", q2: ""
   }
 };
-\n`;
 
-  if (exportedComponents.length > 0) {
-    exportedComponents.forEach((comp, idx) => {
-      const isLast = idx === exportedComponents.length - 1;
-      content += `/**\n * Exercise Component: ${comp.name}\n */\n`;
-      if (isLast) {
-        // Change single `export function CompName` to `export default function CompName`
-        content += comp.code.replace(`export function ${comp.name}`, `export default function ${comp.name}`);
-      } else {
-        content += comp.code;
+`;
+
+  if (extractedBlocks.length > 0) {
+    extractedBlocks.forEach((block, idx) => {
+      const isLast = idx === extractedBlocks.length - 1;
+      const mainCompName = block.declaredNames[block.declaredNames.length - 1];
+
+      content += `/**\n * Exercise Block ${block.blockIndex}: ${block.declaredNames.join(', ')}\n */\n`;
+
+      let blockCode = block.code;
+      if (isLast && mainCompName) {
+        // Change the last block's main component to export default function
+        if (blockCode.includes(`export function ${mainCompName}`)) {
+          blockCode = blockCode.replace(`export function ${mainCompName}`, `export default function ${mainCompName}`);
+        }
       }
-      content += `\n\n`;
+
+      content += blockCode + `\n\n`;
     });
   } else {
     // Fallback starter template
@@ -163,11 +225,11 @@ if (!matched) {
 
 const targetFile = path.join(matched.fullPath, 'Solution.jsx');
 
-// Overwrite existing solution file if run with --force or test
+// Overwrite existing solution file if run with --force
 if (fs.existsSync(targetFile) && !args.includes('--force')) {
   console.log(`\n⚠️ Solution.jsx already exists in ${matched.relPath}`);
   console.log(`File: ${targetFile}`);
-  console.log(`Pass --force to overwrite.`);
+  console.log(`Pass --force to overwrite.\n`);
   process.exit(0);
 }
 

@@ -224,7 +224,7 @@ function ExportReportButton(){
 export default function AnalyticsDashboard(){
   return (
     <div className="dashboard-container">
-      header>
+      <header>
         <h1>Performance Analytics</h1>
         <ExportReportButton />
       </header>
