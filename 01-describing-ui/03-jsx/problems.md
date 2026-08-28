@@ -1,5 +1,5 @@
 
-## Part 1: Recall Questions
+## 1. Recall Questions
 
 *Test your knowledge of core definitions, syntax, and key facts.*
 
@@ -8,14 +8,14 @@
 3. **Closing Tags:** How does JSX differ from standard HTML when handling tags like `<img>`, `<br>`, or `<input>`?
 4. **Attribute Syntax:** What naming convention must be applied to most HTML and SVG attributes when writing JSX? Name the two specific HTML attribute prefixes that are explicitly exempt from this rule.
 
-## Part 2: Conceptual Questions
+## 2. Conceptual Questions
 
 *Explain, compare, and reason about the underlying architecture of React.*
 
 5. **The "Why" of JSX:** Historically, web developers were taught to separate HTML, CSS, and JavaScript into completely separate files (Separation of Concerns). Why does React intentionally break this historical rule by mixing markup and logic together inside components?
 6. **The Wrapper Explanation:** Explain the underlying JavaScript limitation that forces JSX to require a single root element (or Fragment). Why can't you just return three sibling `<div>` tags side-by-side?
 
-## Part 3: Code Reading & Prediction
+## 3. Code Reading & Prediction
 
 *Trace code and predict what React will do.*
 
@@ -46,7 +46,7 @@ export default function UserInput() {
 
 
 
-## Part 4: Debugging Exercises
+## 4. Debugging Exercises
 
 *Find and fix the intentional mistakes in the provided code.*
 
@@ -69,7 +69,7 @@ export default function ContactForm() {
 
 
 
-## Part 5: Implementation Exercises
+## 5. Implementation Exercises
 
 *Write code from scratch based on specific constraints.*
 
@@ -81,7 +81,7 @@ export default function ContactForm() {
 
 
 
-## Part 6: Modification Exercises
+## 6. Modification Exercises
 
 *Adapt existing non-React code into React components.*
 
@@ -110,7 +110,7 @@ export default function FeatureCard() {
 
 
 
-## Part 7: Edge Case Questions
+## 7. Edge Case Questions
 
 *Test boundary conditions and uncommon scenarios.*
 
@@ -118,7 +118,7 @@ export default function FeatureCard() {
 `<svg viewBox="0 0 100 100" fill-rule="evenodd" aria-hidden="true"></svg>`
 How exactly must `viewBox`, `fill-rule`, and `aria-hidden` be written in JSX to avoid console errors? State the rule that applies to each.
 
-## Part 8: Real-World Challenge
+## 8. Real-World Challenge: Jsx
 
 *Combine multiple concepts into a practical problem.*
 

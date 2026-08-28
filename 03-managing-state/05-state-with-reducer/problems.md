@@ -1,5 +1,5 @@
 
-## Level 1: Recall & Foundation
+## 1. Recall Questions
 
 *These exercises test your immediate recall of syntax, rules, and vocabulary.*
 
@@ -19,7 +19,7 @@ A reducer function must be **pure** because React may execute it multiple times 
 
 Why is it considered best practice to declare your reducer function outside of the React component file or outside the component function body?
 
-## Level 2: Conceptual & Architecture
+## 2. Conceptual Questions
 
 *These questions require reasoning about state design and weighing architectural trade-offs.*
 
@@ -44,7 +44,7 @@ Imagine a user clicks a "Reset Form" button on a profile page containing five te
 
 How does `useImmerReducer` fundamentally change the rules regarding immutability inside a reducer? Explain what the `draft` parameter represents and why a `return` statement is often omitted when using Immer.
 
-## Level 3: Code Reading & Prediction
+## 3. Code Reading & Prediction
 
 *Trace code execution mentally without running it in a browser.*
 
@@ -102,7 +102,7 @@ function tagsReducer(state, action){
 }
 ```
 
-## Level 4: Debugging & Error Analysis
+## 4. Debugging Exercises
 
 *Identify and repair intentional violations of React rules.*
 
@@ -156,7 +156,7 @@ function todoReducer(todos, action){
 }
 ```
 
-## Level 5: Implementation from Scratch
+## 5. Implementation Exercises
 
 *Write clean, idiomatic reducer code from scratch.*
 
@@ -198,7 +198,7 @@ Write a reducer function named `historyReducer` that manages a browser-like tab 
 - **Action 1 (`visit_page`):** Takes a `url` payload. Moves `current` to `past`, sets `current` to `url`, and clears `future`.
 - **Action 2 (`go_back`):** Moves `current` to `future`, sets `current` to the last item in `past`, and removes that item from `past`. If `past` is empty, do nothing.
 
-## Level 6: Refactoring & Modification
+## 6. Modification Exercises
 
 *Adapt and scale existing state logic.*
 
@@ -249,7 +249,7 @@ function companyReducer(state, action){
 }
 ```
 
-## Level 7: Edge Cases & Boundary Conditions
+## 7. Edge Case Questions
 
 *Test boundary conditions and framework quirks.*
 
@@ -264,7 +264,7 @@ When running React in development with `<React.StrictMode>`, React deliberately 
 
 In production, an unhandled action type passed to a reducer can cause subtle bugs or silent failures. Write the gold-standard `default` case implementation for a TypeScript or JavaScript switch-based reducer that catches unknown action types during development without crashing the production app silently.
 
-## Level 8: Real-World Architecture Challenge
+## 8. Real-World Challenge: State With Reducer
 
 *Synthesize all concepts into a complex, production-grade problem.*
 

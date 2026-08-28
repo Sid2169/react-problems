@@ -1,5 +1,5 @@
 
-## Level 1: Recall & Foundation
+## 1. Recall Questions
 
 *These exercises test your immediate recall of syntax, framework mechanics, and core vocabulary.*
 
@@ -19,7 +19,7 @@ In modern React, how do you wrap a JSX component tree to supply a dynamically ch
 
 Under what exact runtime circumstance will a component calling `useContext(MyContext)` receive the default value that was passed into `createContext()`?
 
-## Level 2: Conceptual & Architecture
+## 2. Conceptual Questions
 
 *These questions require architectural reasoning, component design trade-offs, and structural analysis.*
 
@@ -38,7 +38,7 @@ Consider an application that uses two separate contexts: `AuthContext` and `Them
 1. If a child component is wrapped in a new `ThemeContext` provider that overrides the theme, does this affect the value it reads from `AuthContext`?
 2. Why does React handle multiple distinct contexts this way compared to single-tree state models?
 
-## Level 8: Code Reading & Prediction
+## 8. Real-World Challenge: Code Reading & Prediction
 
 *Trace component tree execution and state flow mentally without running the code.*
 
@@ -102,7 +102,7 @@ export default function Dashboard(){
 }
 ```
 
-## Level 4: Debugging & Error Analysis
+## 4. Debugging Exercises
 
 *Identify and repair intentional violations of React rules and context mechanics.*
 
@@ -164,7 +164,7 @@ export default function SettingsPanel({ isAdvancedMode }){
 }
 ```
 
-## Level 5: Implementation from Scratch
+## 5. Implementation Exercises
 
 *Write clean, idiomatic Context code without starter templates.*
 
@@ -185,7 +185,7 @@ Build a lightweight internationalization (i18n) system using Context.
 - The provider component should accept `children`, a `lang` prop, and a `translations` dictionary object.
 - If a translation key is missing in the current language dictionary, the `t(key)` function should gracefully fall back to returning the raw key string.
 
-## Level 6: Refactoring & Modification
+## 6. Modification Exercises
 
 *Adapt, scale, and clean up existing state architectures.*
 
@@ -257,7 +257,7 @@ export function BreadcrumbTrail(){
 }
 ```
 
-## Level 7: Edge Cases & Boundary Conditions
+## 7. Edge Case Questions
 
 *Test boundary conditions, framework limits, and performance implications.*
 
@@ -290,7 +290,7 @@ If a component consumes two distinct contexts (`<ThemeContext>` and `<LanguageCo
 1. Does the consuming component re-render?
 2. Is there any native way in standard React (without external libraries or splitting components) to instruct `useContext(ThemeContext)` to only trigger a re-render if a *specific property* (like `theme.mode`) changes inside a complex object context?
 
-## Level 8: Real-World Architecture Challenge
+## 8. Real-World Challenge: Passing Data With Context
 
 *Synthesize all concepts into a comprehensive, production-grade architectural problem.*
 

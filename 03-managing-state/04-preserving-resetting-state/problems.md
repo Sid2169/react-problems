@@ -361,7 +361,7 @@ When `playerId` changes, does lifting `<Counter />`'s state up into `<PlayerCard
 
 ---
 
-## 8. Real-World Challenges
+## 8. Real-World Challenge: The Preserving Resetting State Challenge
 
 *Combine multiple techniques into one realistic feature. Before coding, name which technique from this set addresses each requirement.*
 

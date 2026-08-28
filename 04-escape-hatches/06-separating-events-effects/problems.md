@@ -1,6 +1,6 @@
 
 
-### 1. Recall Questions
+## 1. Recall Questions
 
 1. **The Core Trigger Distinction:** What is the fundamental difference in *why* an event handler executes compared to why an Effect executes?
 2. **Defining Reactive Values:** What specific criteria qualify a variable inside a component as a "reactive value," and which three standard component elements automatically fall into this category?
@@ -8,7 +8,7 @@
 4. **Dependency Exclusion:** Why must functions wrapped in `useEffectEvent` be explicitly omitted from an Effect's dependency array?
 5. **Structural Limitations:** What are the two strict structural boundaries regarding where you can declare, call, or pass an Effect Event?
 
-### 2. Conceptual Questions
+## 2. Conceptual Questions
 
 1. **The Hazard of Reactive Event Handlers:** Imagine a hypothetical version of React where event handlers were reactive—meaning an `onClick` handler would automatically re-execute whenever any state variable it read changed. Why would this paradigm completely destroy the user experience of an interactive application?
 2. **The Stale Closure Mechanics:** A developer notices an Effect re-running too frequently because of a state variable in its dependency array. To stop the re-runs, they suppress the linter (`// eslint-disable-next-line react-hooks/exhaustive-deps`). Trace the exact mechanical sequence of how React's rendering engine processes this suppression, and explain why it guarantees a "stale closure" bug.
@@ -16,7 +16,7 @@
 4. **Breaking the Reactivity Chain:** Explain what it means to "break the chain" of reactivity between an Effect and a non-reactive piece of code. If you want non-reactive logic, why can't you simply declare a standard helper function outside the component file instead of using `useEffectEvent`?
 5. **Custom Hook Encapsulation:** React strictly forbids passing an Effect Event as an argument into a custom Hook (e.g., `useTimer(onTick, 1000)`). What is the architectural reason for this limitation, and how must you restructure the custom Hook and component to achieve the same result safely?
 
-### 3. Code Reading & Prediction
+## 3. Code Reading & Prediction
 
 #### Exercise 3.1: Trigger Analysis
 
@@ -102,7 +102,7 @@ function CursorTracker(){
 }
 ```
 
-### 4. Debugging Exercises
+## 4. Debugging Exercises
 
 #### Exercise 4.1: The Stale Interval Trap
 
@@ -197,7 +197,7 @@ function LiveChat({ serverUrl, roomId, theme }){
 }
 ```
 
-### 5. Implementation Exercises
+## 5. Implementation Exercises
 
 #### Exercise 5.1: Analytics Page View Tracker
 
@@ -224,7 +224,7 @@ Write a `ResponsiveCanvas` component that takes a `layoutMode` prop (`"grid"` or
 - When the window resizes, calculate the new width and call `Telemetry.logResize(window.innerWidth, layoutMode)`.
 - Ensure that changing the `layoutMode` prop does not remove and re-attach the window resize event listener, while guaranteeing the telemetry ping always logs the active layout mode.
 
-### 6. Modification & Refactoring Exercises
+## 6. Modification Exercises
 
 #### Exercise 6.1: Removing Linter Suppressions
 
@@ -317,13 +317,13 @@ export default function LiveTicker({ symbol }){
 }
 ```
 
-### 7. Edge Case Questions
+## 7. Edge Case Questions
 
 1. **Historical vs. Latest State in Async Effects:** If an Effect initiates an asynchronous network request that takes 5 seconds to resolve, and upon resolution calls an Effect Event to log the result along with a prop like `selectedCategory`, explain the difference between reading `selectedCategory` directly inside the Effect Event versus passing it into the Effect Event as an argument from the Effect's setup block (`onComplete(data, selectedCategory)`).
 2. **Multiple Effect Events:** Is there any performance penalty or behavioral risk when declaring multiple distinct `useEffectEvent` hooks inside a single component to serve different Effects? How does React maintain their non-reactive identity across render cycles?
 3. **Module-Scope Variables:** If a configuration object or callback is declared at the top-level module scope (outside the React component function entirely), why does reading it inside an Effect not trigger a linter warning, and why is `useEffectEvent` unnecessary for it?
 
-### 8. Real-World Challenges
+## 8. Real-World Challenge: s
 
 #### Challenge 8.1: Real-Time Financial Ticker with Dynamic Alerts
 

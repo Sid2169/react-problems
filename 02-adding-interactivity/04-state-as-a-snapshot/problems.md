@@ -276,7 +276,7 @@ No solutions below — write and actually run these.
 5. You call the same setter twice in a row with two *different* computed values — `setNumber(number + 1); setNumber(number + 10);` — instead of the same value twice. Does the second call "win"? Is that the same underlying mechanism as the `+3` button collapsing to `+1`, or something different?
 6. Suppose a component has no state at all — just a `let` local variable computed and reassigned directly in the render body (not inside any event handler). Does the "snapshot" idea from this lesson apply to that variable too, in any sense, or does it not really come up at all here?
 
-## 8. Real-World Challenge
+## 8. Real-World Challenge: The State As A Snapshot Challenge
 
 Build a `FeedbackForm` that combines everything above:
 

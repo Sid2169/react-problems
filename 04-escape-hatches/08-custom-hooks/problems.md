@@ -1,6 +1,6 @@
 
 
-### Phase 1: Recall & Foundational Knowledge (Low Cognitive Demand)
+## 1. Recall Questions
 
 **1. The Naming Convention**
 
@@ -10,7 +10,7 @@ React enforces a strict naming convention for components and Hooks. What is the 
 
 When you extract a `useState` call into a custom Hook and then call that Hook in three different components, how many independent state variables are created? Explain the difference between sharing *state* and sharing *stateful logic*.
 
-### Phase 2: Conceptual Reasoning (Medium Cognitive Demand)
+## 2. Conceptual Questions
 
 **3. The "Pure Function" Boundary**
 
@@ -22,7 +22,7 @@ Should you name this function `usePowerToWeightRatio` or `calculatePowerToWeight
 
 Custom Hooks re-render alongside the component that calls them. If a component passes a dynamic prop (like a `searchQuery`) into a custom Hook, how does the custom Hook "know" to re-synchronize or re-fetch data? What React mechanism must be utilized inside the Hook to handle this incoming change?
 
-### Phase 3: Code Reading & Prediction (Medium Cognitive Demand)
+## 3. Code Reading & Prediction
 
 **5. Tracing Independent State**
 
@@ -56,7 +56,7 @@ export default function WorkoutLogger(){
 
 **Task:** Predict exactly what happens to the UI and the underlying state if the user clicks the "Squat RIR" button twice. Does the `benchRIR` state change? Why or why not?
 
-### Phase 4: Debugging (Medium-Hard Cognitive Demand)
+## 4. Debugging Exercises
 
 **6. The Conditional Hook Trap**
 
@@ -84,7 +84,7 @@ export function useMotorcycleSpecs(modelName){
 }
 ```
 
-### Phase 5: Implementation (Hard Cognitive Demand)
+## 5. Implementation Exercises
 
 **7. Persistent Browser Memory**
 
@@ -109,7 +109,7 @@ export function useLocalStorage(key, initialValue){
 }
 ```
 
-### Phase 6: Modification & Adaptation (Hard Cognitive Demand)
+## 6. Modification Exercises
 
 **8. Extending the Network Tracker**
 
@@ -152,7 +152,7 @@ export function useOnlineStatus(){
 }
 ```
 
-### Phase 7: Edge Cases & Boundary Conditions (Very Hard Cognitive Demand)
+## 7. Edge Case Questions
 
 **9. Stale Closures and Event Handlers**
 
@@ -160,7 +160,7 @@ When passing an event handler (like `onReceiveMessage`) into a custom Hook, addi
 
 Explain how React's `useEffectEvent` solves this specific edge case. What would happen in a highly active chat room if `useEffectEvent` was *not* used, and the Effect had to re-connect to the server every time a parent state changed?
 
-### Phase 8: Real-World Challenge (Mastery)
+## 8. Real-World Challenge: (Mastery)
 
 **10. The Live PDF Preview Engine**
 

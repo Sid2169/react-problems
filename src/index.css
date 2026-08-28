@@ -459,6 +459,13 @@ body {
   color: #a5b4fc;
 }
 
+.unsolved-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+}
+
 .btn-copy-template {
   display: flex;
   align-items: center;
@@ -476,6 +483,27 @@ body {
 }
 
 .btn-copy-template:hover {
+  transform: translateY(-2px);
+}
+
+.btn-copy-cli {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: #090d16;
+  color: #a5b4fc;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-copy-cli:hover {
+  border-color: #818cf8;
+  background: #1e293b;
   transform: translateY(-2px);
 }
 

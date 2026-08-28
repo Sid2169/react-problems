@@ -1,4 +1,4 @@
-### 1. Recall Questions
+## 1. Recall Questions
 
 1. **The Primary Purpose of Effects:** In the React paradigm, what is the single intended purpose of an Effect, and what are two common scenarios where developers mistakenly use them?
 2. **The Cascading Render:** What specifically happens in React's rendering pipeline when you update a state variable inside an Effect that was triggered by a prop change?
@@ -6,7 +6,7 @@
 4. **Component Reset:** What component attribute can you pass from a parent to a child to instruct React to treat two instances as conceptually distinct components, automatically resetting all internal DOM and state without using an Effect?
 5. **App Initialization:** Why is placing app-wide initialization logic (like checking an auth token) inside a root-level `useEffect` without guards problematic during development?
 
-### 2. Conceptual Questions
+## 2. Conceptual Questions
 
 1. **Render Pipeline vs. Effect Execution:** Explain why transforming data (such as filtering an array) inside an Effect is significantly less efficient than calculating it directly at the top level of a component function. Trace the exact sequence of React events in both scenarios.
 2. **The "Why" Test:** How do you determine whether a piece of logic belongs in an event handler or an Effect? Apply this test to contrast sending an analytics event when a page loads versus sending a POST request when a user submits a form.
@@ -14,7 +14,7 @@
 4. **The Fragility of Effect Chains:** Describe the maintenance and performance hazards of "chaining" Effects—where one Effect sets a state variable, which triggers another Effect to set another state variable. Why does this pattern make features like "time-travel" or history scrubbing difficult to implement?
 5. **State as a Snapshot:** If you extract logic from an Effect into an event handler and execute `setRound(round + 1)`, why will inspecting `round` immediately on the next line evaluate to the old value? How should you structure calculations that depend on the next state value inside an event handler?
 
-### 3. Code Reading & Prediction
+## 3. Code Reading & Prediction
 
 #### Exercise 3.1: The Render Counter
 
@@ -78,7 +78,7 @@ function App(){
 }
 ```
 
-### 4. Debugging Exercises
+## 4. Debugging Exercises
 
 #### Exercise 4.1: The Redundant State Loop
 
@@ -155,7 +155,7 @@ function SettingsLoader({ onSettingsLoaded }){
 }
 ```
 
-### 5. Implementation Exercises
+## 5. Implementation Exercises
 
 #### Exercise 5.1: Pure Derivation with Caching
 
@@ -181,7 +181,7 @@ Write an application initialization sequence that executes a `loadAnalyticsScrip
 - Avoid running twice even if the root component is destroyed and recreated.
 - Demonstrate both the top-level variable tracking approach and the module-level conditional approach.
 
-### 6. Modification & Refactoring Exercises
+## 6. Modification Exercises
 
 #### Exercise 6.1: Decoupling Chained Effects
 
@@ -276,13 +276,13 @@ function DocumentEditor({ docId, initialContent }){
 }
 ```
 
-### 7. Edge Case Questions
+## 7. Edge Case Questions
 
 1. **During-Render State Updates:** The lesson shows that you can adjust state during rendering using the pattern `if (items !== prevItems) { setPrevItems(items); }`. What happens if you attempt to call a setter function for a *different* component's state during the render phase? Why does React enforce this boundary?
 2. **Infinite Loop Conditionals:** When adjusting state during rendering (to avoid an Effect), what critical condition must always wrap the state-setting call, and what exact runtime error or behavior occurs if you omit it?
 3. **The Dropdown Dependency Exception:** The lesson states: *"Imagine a form with multiple dropdowns where the options of the next dropdown depend on the selected value of the previous dropdown. Then, a chain of Effects is appropriate because you are synchronizing with network."* Why is an Effect chain acceptable here, whereas it is an anti-pattern for pure client-side state adjustments? What distinguishes this edge case?
 
-### 8. Real-World Challenges
+## 8. Real-World Challenge: s
 
 #### Challenge 8.1: The High-Performance Data Explorer
 
