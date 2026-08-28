@@ -13,7 +13,7 @@
 - **Problem 2.2:** By default, custom user-defined components (e.g., `<MyCustomInput/>`) completely encapsulate their internal DOM architecture, causing an error if a parent attempts to bind a standard `ref` prop to them without internal configuration. Explain the architectural benefits of this boundary.
 - **Problem 2.3:** Contrast *destructive* native DOM manipulation (such as calling `.remove()` or `.appendChild()` directly on elements) with *non-destructive* browser API execution (such as `.focus()` or `.scrollIntoView()`). Explain why the former can trigger internal engine crashes in React while the latter remains stable.
 
-## 3. Code Reading & Prediction Exercises
+## 3. Code Reading & Prediction
 
 ### Problem 3.1: The Stale Boundary Viewport
 
@@ -287,7 +287,7 @@ export default function RollingChatFeed(){
 - **Problem 7.1:** React runs ref callbacks twice in development mode under `StrictMode`. If your callback architecture appends items to a collection without cleaning them up (e.g., `map.set(id, node)`), what side effects occur? Write a proper cleanup function declaration to prevent memory leaks or reference accumulation.
 - **Problem 7.2:** If a component conditionally renders an element (`{isVisible && <textarea ref={memoRef} />}`), what exact value does React write to `memoRef.current` when `isVisible` changes from `true` to `false`? At what point during the execution sequence does this update happen?
 
-## 8. Real-World Challenges
+## 8. Real-World Challenge: The Manipulating Dom With Refs Challenge
 
 ### The Dynamic Infinite Scroll Section Matrix Dashboard
 

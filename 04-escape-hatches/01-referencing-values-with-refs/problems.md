@@ -25,7 +25,7 @@
     - If the application needs to display the exact live pixel count as text on the screen, should they use state or a ref?
     - If the application only needs to silently check if the total scroll distance has crossed a threshold of 500 pixels to fetch data inside an event handler, should they use state or a ref? Explain your reasoning for both scenarios.
 
-## 3. Code Reading & Prediction Exercises
+## 3. Code Reading & Prediction
 
 ### Problem 3.1: The Render Synchronicity Maze
 
@@ -269,7 +269,7 @@ export default function TelemetryDashboard(){
     - Explain why this syntax performs poorly, specifically highlighting what happens to the `new DeepAnalyticalEngine()` constructor execution on subsequent component re-renders.
     - Refactor this initialization step using the defensive "lazy initialization pattern" inside a conditional rendering branch to ensure the constructor executes exactly once during the initial mount phase.
 
-## 8. Real-World Challenges
+## 8. Real-World Challenge: The Referencing Values With Refs Challenge
 
 ### The Multi-Stage Resilient Form Uploader Dashboard
 

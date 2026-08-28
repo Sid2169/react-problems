@@ -1,4 +1,4 @@
-### Level 1: Recall Questions
+## 1. Recall Questions
 
 **Objective:** Test foundational knowledge of syntax, linting rules, and React Effect mechanics.
 
@@ -7,7 +7,7 @@
 3. True or False: You can selectively choose which reactive values to omit from the dependency array if you don't want the Effect to re-run when those specific values change.
 4. According to the lesson, what is the correct workflow for changing an Effect's dependencies? (Hint: Do you change the array first, or the code first?)
 
-### Level 2: Conceptual Questions
+## 2. Conceptual Questions
 
 **Objective:** Explain and reason about Effect behavior and React's synchronization model.
 
@@ -15,7 +15,7 @@
 2. If a component reads both a `userId` (to fetch user data) and a `theme` (to style a toast notification) inside a data-fetching Effect, what bug is introduced when the user toggles the application from light mode to dark mode? How does `useEffectEvent` solve this?
 3. Why is it problematic to have a single `useEffect` block synchronize two unrelated processes (e.g., fetching a list of Royal Enfield motorcycle models based on a `brand` prop, and fetching specific engine specs based on a `selectedModel` state)?
 
-### Level 3: Code Reading & Prediction
+## 3. Code Reading & Prediction
 
 **Objective:** Trace execution flow and predict output or bugs in existing code.
 
@@ -40,7 +40,7 @@ function RestTimer(){
 }
 ```
 
-### Level 4: Debugging Exercises
+## 4. Debugging Exercises
 
 **Objective:** Identify and fix intentional mistakes involving reactive values and infinite loops.
 
@@ -71,7 +71,7 @@ function MotorcycleSpecViewer({ modelId }){
 }
 ```
 
-### Level 5: Implementation Exercises
+## 5. Implementation Exercises
 
 **Objective:** Write code from scratch applying dependency management rules.
 
@@ -79,7 +79,7 @@ function MotorcycleSpecViewer({ modelId }){
     - When a `new-set` event fires from the socket, append the new set to the state.
     - **Constraint:** The socket must *not* disconnect and reconnect every time a new set is added. You must not include `loggedSets` in the dependency array.
 
-### Level 6: Modification Exercises
+## 6. Modification Exercises
 
 **Objective:** Refactor existing code to adhere to best practices for separating reactive and non-reactive logic.
 
@@ -106,7 +106,7 @@ function ResumePreview({ resumeData }){
 }
 ```
 
-### Level 7: Edge Case Questions
+## 7. Edge Case Questions
 
 **Objective:** Test boundary conditions and uncommon rendering scenarios.
 
@@ -114,7 +114,7 @@ function ResumePreview({ resumeData }){
     - What happens to the `Child`'s effect every time the parent component re-renders?
     - Name two distinct React features/hooks (one from the parent's side, one from the child's side) that could prevent this unnecessary re-synchronization.
 
-### Level 8: Real-World Challenge
+## 8. Real-World Challenge: Removing Effect Dependencies
 
 **Objective:** Combine multiple concepts into a complex, practical application architecture.
 

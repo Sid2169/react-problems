@@ -33,7 +33,7 @@
 
 Describe how removing prop-drilling impacts component testability. What are the advantages and drawbacks when trying to unit-test `Task` in isolation now that it consumes data via Context rather than direct props?
 
-## 3. Code Reading & Prediction Exercises
+## 3. Code Reading & Prediction
 
 ### Problem 3.1: The Evaluation Trail
 
@@ -275,7 +275,7 @@ export function useTasksDispatch(){
     - Does React compute a deep comparative analysis on object keys by default within `useReducer` structures to skip re-renders?
     - Based on how JavaScript handles array memory reference identities across copy spreads like `return [...tasks]`, trace whether sibling components consuming `useTasks()` execute render phases anyway.
 
-## 8. Real-World Challenges
+## 8. Real-World Challenge: The Reducer And Context Challenge
 
 ### The Enterprise Project Management Dashboard Board Architecture
 

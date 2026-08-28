@@ -1,21 +1,21 @@
-import React, { useState, useEffect, useMemo, Component } from 'react';
-import { 
-  Folder, 
-  FileCode, 
-  Play, 
-  Code2, 
-  Sparkles, 
-  ChevronRight, 
-  Layers, 
-  CheckCircle2, 
-  AlertTriangle,
-  RefreshCw,
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Check,
+  Copy,
+  Terminal,
+  Code2,
+  Sparkles,
   BookOpen,
-  Box
+  CheckCircle2,
+  Circle,
+  FileCode,
+  Layers,
+  AlertTriangle,
+  Play
 } from 'lucide-react';
 
-// Robust Error Boundary to catch render-time errors in solution components
-class ComponentErrorBoundary extends Component {
+// Error Boundary for user solution components
+class ComponentErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -41,16 +41,12 @@ class ComponentErrorBoundary extends Component {
         <div className="error-card">
           <div className="error-header">
             <AlertTriangle className="error-icon" size={20} />
-            <h3>Runtime Component Error</h3>
+            <h3>Runtime Error in Solution Component</h3>
           </div>
-          <p className="error-message">{this.state.error?.toString()}</p>
-          <pre className="error-stack">{this.state.error?.stack}</pre>
-          <button 
-            className="btn-retry"
-            onClick={() => this.setState({ hasError: false, error: null })}
-          >
-            <RefreshCw size={14} /> Retry Rendering
-          </button>
+          <pre className="error-stack">{this.state.error?.toString()}</pre>
+          <p className="error-tip">
+            Fix the syntax or logic error in your <code>Solution.jsx</code> file and save to re-render.
+          </p>
         </div>
       );
     }
@@ -58,92 +54,117 @@ class ComponentErrorBoundary extends Component {
   }
 }
 
-// Auto-discover all Solution.jsx files anywhere in the repo (relative to src/)
-const rawModules = import.meta.glob(
-  [
-    '../01-describing-ui/**/[sS]olution*.{jsx,tsx}',
-    '../02-adding-interactivity/**/[sS]olution*.{jsx,tsx}',
-    '../03-managing-state/**/[sS]olution*.{jsx,tsx}',
-    '../04-escape-hatches/**/[sS]olution*.{jsx,tsx}',
-    '../**/[sS]olution*.{jsx,tsx}'
-  ],
-  { eager: true }
-);
+// Auto-discover all problems.md and Solution.jsx files across all 31 topics
+const problemFiles = import.meta.glob('/0*/*-*/problems.md', { query: '?raw', import: 'default', eager: false });
+const solutionFiles = import.meta.glob('/0*/*-*/Solution.jsx', { eager: true });
+const lowercaseSolutionFiles = import.meta.glob('/0*/*-*/solution.jsx', { eager: true });
 
-function formatTitle(str) {
-  return str
-    .replace(/^\d+-/, '')
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
-
-function parseModulePath(path) {
-  // Format: ../01-describing-ui/01-first-component/Solution.jsx
-  const cleanPath = path.replace(/^(\.\.\/|\.\/)/, '');
-  const parts = cleanPath.split('/');
-  if (parts.length < 3) return null;
-
-  const categoryDir = parts[0];
-  const topicDir = parts[1];
-  const filename = parts[parts.length - 1];
-
-  const categoryName = categoryDir.replace(/^\d+-/, '').split('-').map(w => w.toUpperCase()).join(' ');
-  const topicName = formatTitle(topicDir);
-
-  return {
-    rawPath: cleanPath,
-    categoryDir,
-    categoryName,
-    topicDir,
-    topicName,
-    filename
-  };
-}
+// Robust clipboard copy with fallback
+const copyToClipboard = async (text) => {
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (err) {
+    // Fallback using textarea element
+  }
+  try {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textarea);
+    return successful;
+  } catch (err) {
+    console.error('Failed to copy to clipboard', err);
+    return false;
+  }
+};
 
 export default function App() {
-  // Organize solutions by category and topic
-  const solutionTree = useMemo(() => {
-    const categories = {};
+  const [copiedTemplate, setCopiedTemplate] = useState(false);
+  const [copiedCli, setCopiedCli] = useState(false);
 
-    Object.keys(rawModules).forEach(path => {
-      const parsed = parseModulePath(path);
-      if (!parsed) return;
+  // Index all categories and topics
+  const { categoryList, totalTopics, totalSolved } = useMemo(() => {
+    const categoriesMap = {};
+    const problemPaths = Object.keys(problemFiles);
+    let solvedCount = 0;
 
-      const { categoryDir, categoryName, topicDir, topicName } = parsed;
-      const mod = rawModules[path];
+    problemPaths.forEach((probPath) => {
+      const parts = probPath.split('/');
+      const categoryDir = parts[1];
+      const topicDir = parts[2];
+      const relTopicPath = `${categoryDir}/${topicDir}`;
 
-      // Filter exported components from module
+      const formatTitle = (str) =>
+        str
+          .replace(/^\d+-/, '')
+          .split('-')
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(' ');
+
+      const categoryName = formatTitle(categoryDir);
+      const topicName = formatTitle(topicDir);
+
+      const solKey = `/${relTopicPath}/Solution.jsx`;
+      const lowerSolKey = `/${relTopicPath}/solution.jsx`;
+      const solutionMatch = solutionFiles[solKey]
+        ? { mod: solutionFiles[solKey], solPath: solKey }
+        : lowercaseSolutionFiles[lowerSolKey]
+        ? { mod: lowercaseSolutionFiles[lowerSolKey], solPath: lowerSolKey }
+        : null;
+
+      const isSolved = !!solutionMatch;
+      if (isSolved) solvedCount++;
+
       const exports = [];
-      Object.keys(mod).forEach(exportName => {
-        const exportedItem = mod[exportName];
-        if (typeof exportedItem === 'function') {
-          exports.push({
-            name: exportName === 'default' ? 'Default Component (Main)' : exportName,
-            isDefault: exportName === 'default',
-            component: exportedItem
-          });
-        }
-      });
+      let notes = null;
 
-      if (!categories[categoryDir]) {
-        categories[categoryDir] = {
+      if (isSolved && solutionMatch.mod) {
+        const mod = solutionMatch.mod;
+        Object.keys(mod).forEach((exportName) => {
+          const exportedItem = mod[exportName];
+          if (typeof exportedItem === 'function') {
+            exports.push({
+              name: exportName === 'default' ? 'Main Challenge Solution (Default)' : exportName,
+              isDefault: exportName === 'default',
+              component: exportedItem
+            });
+          }
+        });
+        notes = mod.answers || mod.notes || mod.metadata || null;
+      }
+
+      if (!categoriesMap[categoryDir]) {
+        categoriesMap[categoryDir] = {
           name: categoryName,
           dir: categoryDir,
           topics: []
         };
       }
 
-      categories[categoryDir].topics.push({
+      categoriesMap[categoryDir].topics.push({
         dir: topicDir,
         name: topicName,
-        path,
+        relTopicPath,
+        solutionPath: isSolved ? solutionMatch.solPath : `${relTopicPath}/Solution.jsx`,
+        isSolved,
         exports,
-        notes: mod.answers || mod.notes || mod.metadata || null
+        notes
       });
     });
 
-    return Object.values(categories);
+    const categoryList = Object.values(categoriesMap);
+    return {
+      categoryList,
+      totalTopics: problemPaths.length,
+      totalSolved: solvedCount
+    };
   }, []);
 
   // Active selection states
@@ -153,32 +174,94 @@ export default function App() {
 
   // Default selection on load
   useEffect(() => {
-    if (solutionTree.length > 0) {
-      const firstCat = solutionTree[0];
+    if (categoryList.length > 0) {
+      const firstCat = categoryList[0];
       setSelectedCategory(firstCat.dir);
       if (firstCat.topics.length > 0) {
         const firstTopic = firstCat.topics[0];
-        setSelectedTopic(firstTopic.path);
+        setSelectedTopic(firstTopic.relTopicPath);
         if (firstTopic.exports.length > 0) {
           setSelectedExport(firstTopic.exports[0].name);
         }
       }
     }
-  }, [solutionTree]);
+  }, [categoryList]);
 
   const activeCategoryObj = useMemo(() => {
-    return solutionTree.find(c => c.dir === selectedCategory);
-  }, [solutionTree, selectedCategory]);
+    return categoryList.find((c) => c.dir === selectedCategory);
+  }, [categoryList, selectedCategory]);
 
   const activeTopicObj = useMemo(() => {
     if (!activeCategoryObj) return null;
-    return activeCategoryObj.topics.find(t => t.path === selectedTopic);
+    return activeCategoryObj.topics.find((t) => t.relTopicPath === selectedTopic);
   }, [activeCategoryObj, selectedTopic]);
 
   const activeExportObj = useMemo(() => {
-    if (!activeTopicObj) return null;
-    return activeTopicObj.exports.find(e => e.name === selectedExport) || activeTopicObj.exports[0];
+    if (!activeTopicObj || !activeTopicObj.isSolved) return null;
+    return activeTopicObj.exports.find((e) => e.name === selectedExport) || activeTopicObj.exports[0];
   }, [activeTopicObj, selectedExport]);
+
+  const handleCopyTemplate = async (relPath, topicName) => {
+    const template = `import React, { useState, useEffect } from 'react';
+
+/**
+ * -------------------------------------------------------------------
+ * Solution for ${relPath} (${topicName})
+ * -------------------------------------------------------------------
+ */
+
+// Written Answers (Recall, Conceptual, Edge Cases)
+export const answers = {
+  recall: {
+    q1: "Answer to Question 1",
+    q2: "Answer to Question 2"
+  },
+  conceptual: {
+    q1: "Answer to Conceptual Question 1"
+  }
+};
+
+/**
+ * Exercise Component
+ */
+export function Exercise5_1() {
+  return (
+    <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+      <h3>Exercise 5.1 Solution</h3>
+      <p>Component logic for ${topicName} goes here.</p>
+    </div>
+  );
+}
+
+/**
+ * Main Challenge Solution
+ */
+export default function MainSolution() {
+  return (
+    <div style={{ padding: '20px', background: '#e0e7ff', color: '#3730a3', borderRadius: '8px' }}>
+      <h2>Real-World Challenge Solution</h2>
+      <p>Main practice output for ${topicName}.</p>
+    </div>
+  );
+}
+`;
+    const success = await copyToClipboard(template);
+    if (success) {
+      setCopiedTemplate(true);
+      setTimeout(() => setCopiedTemplate(false), 2000);
+    }
+  };
+
+  const handleCopyCliCommand = async (relPath) => {
+    const cmd = `npm run new ${relPath}`;
+    const success = await copyToClipboard(cmd);
+    if (success) {
+      setCopiedCli(true);
+      setTimeout(() => setCopiedCli(false), 2000);
+    }
+  };
+
+  const progressPercent = Math.round((totalSolved / (totalTopics || 1)) * 100);
 
   return (
     <div className="workbench-layout">
@@ -189,15 +272,18 @@ export default function App() {
             <Sparkles size={18} />
           </div>
           <div>
-            <h1>React Problems Workbench</h1>
-            <p className="subtitle">Single-File Solution Runner & Auto-Discovery</p>
+            <h1>React Practice Workbench</h1>
+            <p className="subtitle">Interactive Solution Runner & Progress Tracker</p>
           </div>
         </div>
 
         <div className="header-meta">
+          <div className="progress-bar-container">
+            <div className="progress-fill" style={{ width: `${progressPercent}%` }}></div>
+          </div>
           <div className="stat-chip">
-            <Box size={14} />
-            <span>{solutionTree.flatMap(c => c.topics).length} Solutions Found</span>
+            <Layers size={14} />
+            <span>{totalSolved} / {totalTopics} Topics Solved ({progressPercent}%)</span>
           </div>
         </div>
       </header>
@@ -207,130 +293,187 @@ export default function App() {
         <aside className="workbench-sidebar">
           <div className="sidebar-section-title">
             <BookOpen size={14} />
-            <span>CATEGORIES</span>
+            <span>ALL TOPICS ({totalTopics})</span>
           </div>
 
           <nav className="nav-categories">
-            {solutionTree.map(cat => (
-              <div key={cat.dir} className="category-group">
-                <button
-                  className={`category-btn ${selectedCategory === cat.dir ? 'active' : ''}`}
-                  onClick={() => {
-                    setSelectedCategory(cat.dir);
-                    if (cat.topics.length > 0) {
-                      setSelectedTopic(cat.topics[0].path);
-                      if (cat.topics[0].exports.length > 0) {
-                        setSelectedExport(cat.topics[0].exports[0].name);
+            {categoryList.map((cat) => {
+              const catSolvedCount = cat.topics.filter((t) => t.isSolved).length;
+              return (
+                <div key={cat.dir} className="category-group">
+                  <button
+                    className={`category-btn ${selectedCategory === cat.dir ? 'active' : ''}`}
+                    onClick={() => {
+                      setSelectedCategory(cat.dir);
+                      if (cat.topics.length > 0) {
+                        const nextTopic = cat.topics[0];
+                        setSelectedTopic(nextTopic.relTopicPath);
+                        if (nextTopic.exports.length > 0) {
+                          setSelectedExport(nextTopic.exports[0].name);
+                        }
                       }
-                    }
-                  }}
-                >
-                  <Folder size={16} />
-                  <span className="cat-name">{cat.name}</span>
-                  <span className="cat-badge">{cat.topics.length}</span>
-                </button>
+                    }}
+                  >
+                    <span className="cat-name">{cat.name}</span>
+                    <span className="cat-count">
+                      {catSolvedCount}/{cat.topics.length}
+                    </span>
+                  </button>
 
-                {selectedCategory === cat.dir && (
-                  <div className="topics-list">
-                    {cat.topics.map(topic => (
-                      <button
-                        key={topic.path}
-                        className={`topic-btn ${selectedTopic === topic.path ? 'active' : ''}`}
-                        onClick={() => {
-                          setSelectedTopic(topic.path);
-                          if (topic.exports.length > 0) {
-                            setSelectedExport(topic.exports[0].name);
-                          }
-                        }}
-                      >
-                        <FileCode size={14} />
-                        <span>{topic.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {solutionTree.length === 0 && (
-              <div className="empty-sidebar-notice">
-                <AlertTriangle size={18} />
-                <p>No `Solution.jsx` files found yet.</p>
-                <small>Create `Solution.jsx` inside any problem directory to see it here!</small>
-              </div>
-            )}
+                  {selectedCategory === cat.dir && (
+                    <ul className="topic-list">
+                      {cat.topics.map((t) => (
+                        <li key={t.relTopicPath}>
+                          <button
+                            className={`topic-btn ${selectedTopic === t.relTopicPath ? 'active' : ''}`}
+                            onClick={() => {
+                              setSelectedTopic(t.relTopicPath);
+                              if (t.exports.length > 0) {
+                                setSelectedExport(t.exports[0].name);
+                              }
+                            }}
+                          >
+                            {t.isSolved ? (
+                              <CheckCircle2 size={14} className="icon-solved" />
+                            ) : (
+                              <Circle size={14} className="icon-unsolved" />
+                            )}
+                            <span className="topic-name">{t.name}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
           </nav>
         </aside>
 
-        {/* Main Content Area */}
+        {/* Main Content Workspace */}
         <main className="workbench-main">
           {activeTopicObj ? (
-            <div className="topic-container">
-              {/* Topic Breadcrumb & Header */}
-              <div className="topic-bar">
-                <div className="breadcrumb">
-                  <span>{activeCategoryObj?.name}</span>
-                  <ChevronRight size={14} />
-                  <strong className="current-topic">{activeTopicObj.name}</strong>
+            <div className="workspace-container">
+              {/* Workspace Header */}
+              <div className="workspace-header">
+                <div>
+                  <div className="topic-breadcrumb">
+                    <span>{activeCategoryObj?.name}</span> / <span>{activeTopicObj.name}</span>
+                  </div>
+                  <h2 className="topic-title">{activeTopicObj.name}</h2>
                 </div>
-                <div className="file-path-tag">
-                  <code>{activeTopicObj.path}</code>
-                </div>
-              </div>
 
-              {/* Exercise / Component Selector Tabs */}
-              <div className="exports-bar">
-                <div className="exports-label">
-                  <Layers size={15} />
-                  <span>Exported Exercises:</span>
-                </div>
-                <div className="exports-tabs">
-                  {activeTopicObj.exports.map(exp => (
-                    <button
-                      key={exp.name}
-                      className={`tab-btn ${selectedExport === exp.name ? 'active' : ''}`}
-                      onClick={() => setSelectedExport(exp.name)}
-                    >
-                      <Play size={12} className="play-icon" />
-                      <span>{exp.name}</span>
-                    </button>
-                  ))}
-                  {activeTopicObj.exports.length === 0 && (
-                    <span className="no-exports-msg">No exported components found in this solution file.</span>
+                <div className="status-badge-container">
+                  {activeTopicObj.isSolved ? (
+                    <span className="badge-solved">
+                      <CheckCircle2 size={14} /> Solved
+                    </span>
+                  ) : (
+                    <span className="badge-unsolved">
+                      <Circle size={14} /> Unsolved
+                    </span>
                   )}
                 </div>
               </div>
 
-              {/* Render Canvas */}
-              <div className="preview-stage">
-                <div className="stage-header">
-                  <div className="stage-title">
-                    <CheckCircle2 size={16} className="text-success" />
-                    <span>Live Render Canvas — <strong>{selectedExport}</strong></span>
-                  </div>
-                </div>
-
-                <div className="stage-viewport">
-                  {activeExportObj?.component ? (
-                    <ComponentErrorBoundary resetKey={`${selectedTopic}-${selectedExport}`}>
-                      <div className="rendered-component-wrapper">
-                        {React.createElement(activeExportObj.component)}
+              {activeTopicObj.isSolved ? (
+                <>
+                  {/* Export Switcher Toolbar */}
+                  {activeTopicObj.exports.length > 0 && (
+                    <div className="export-switcher">
+                      <span className="switcher-label">
+                        <FileCode size={14} /> Component Exports:
+                      </span>
+                      <div className="export-pills">
+                        {activeTopicObj.exports.map((e) => (
+                          <button
+                            key={e.name}
+                            className={`pill-btn ${
+                              (selectedExport || activeTopicObj.exports[0].name) === e.name ? 'active' : ''
+                            }`}
+                            onClick={() => setSelectedExport(e.name)}
+                          >
+                            <Play size={12} />
+                            <span>{e.name}</span>
+                          </button>
+                        ))}
                       </div>
-                    </ComponentErrorBoundary>
-                  ) : (
-                    <div className="empty-viewport">
-                      <Code2 size={32} />
-                      <p>Select an exercise component above to run its live output.</p>
                     </div>
                   )}
-                </div>
-              </div>
 
-              {/* Solution Notes / Text Answers if available */}
-              {activeTopicObj.notes && (
-                <div className="notes-card">
-                  <h3>Written / Conceptual Answers</h3>
-                  <pre>{JSON.stringify(activeTopicObj.notes, null, 2)}</pre>
+                  {/* Render Canvas Container */}
+                  <div className="render-stage">
+                    <div className="stage-header">
+                      <span className="stage-title">Live Component Canvas</span>
+                      <span className="export-name-tag">
+                        Active: <code>{activeExportObj?.name || 'Default'}</code>
+                      </span>
+                    </div>
+
+                    <div className="stage-viewport">
+                      {activeExportObj?.component ? (
+                        <ComponentErrorBoundary resetKey={`${selectedTopic}-${selectedExport}`}>
+                          <div className="rendered-component-wrapper">
+                            {React.createElement(activeExportObj.component)}
+                          </div>
+                        </ComponentErrorBoundary>
+                      ) : (
+                        <div className="empty-viewport">
+                          <Code2 size={32} />
+                          <p>Select an exercise component above to run its live output.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Solution Notes / Text Answers if available */}
+                  {activeTopicObj.notes && (
+                    <div className="notes-card">
+                      <h3>Written / Conceptual Answers</h3>
+                      <pre>{JSON.stringify(activeTopicObj.notes, null, 2)}</pre>
+                    </div>
+                  )}
+                </>
+              ) : (
+                /* Unsolved Topic Starter Screen */
+                <div className="unsolved-card">
+                  <div className="unsolved-header">
+                    <FileCode size={36} className="text-accent" />
+                    <h2>Start Practicing: {activeTopicObj.name}</h2>
+                    <p>
+                      No <code>Solution.jsx</code> file found in <code>./{activeTopicObj.relTopicPath}/</code> yet.
+                    </p>
+                  </div>
+
+                  <div className="unsolved-actions">
+                    <button
+                      className="btn-copy-template"
+                      onClick={() => handleCopyTemplate(activeTopicObj.relTopicPath, activeTopicObj.name)}
+                    >
+                      {copiedTemplate ? <Check size={16} /> : <Copy size={16} />}
+                      <span>{copiedTemplate ? 'Template Copied!' : 'Copy Starter Solution.jsx Template'}</span>
+                    </button>
+
+                    <button
+                      className="btn-copy-cli"
+                      onClick={() => handleCopyCliCommand(activeTopicObj.relTopicPath)}
+                    >
+                      {copiedCli ? <Check size={16} /> : <Terminal size={16} />}
+                      <span>{copiedCli ? 'CLI Command Copied!' : `Copy CLI Command: npm run new ${activeTopicObj.relTopicPath}`}</span>
+                    </button>
+                  </div>
+
+                  <div className="unsolved-instructions">
+                    <h4>Two Quick Ways to Start:</h4>
+                    <ol>
+                      <li>
+                        <strong>Option A (CLI Scaffolder)</strong>: Run <code>npm run new {activeTopicObj.relTopicPath}</code> in your terminal to automatically extract problem code into <code>Solution.jsx</code>.
+                      </li>
+                      <li>
+                        <strong>Option B (Manual Copy)</strong>: Click <em>"Copy Starter Solution.jsx Template"</em> above, create a <code>Solution.jsx</code> file inside <code>./{activeTopicObj.relTopicPath}/</code>, and paste.
+                      </li>
+                    </ol>
+                  </div>
                 </div>
               )}
             </div>
@@ -338,7 +481,7 @@ export default function App() {
             <div className="empty-state">
               <Sparkles size={48} />
               <h2>Welcome to React Practice Workbench</h2>
-              <p>Create a <code>Solution.jsx</code> file inside any topic folder to run your code!</p>
+              <p>Select any topic from the sidebar to start practicing!</p>
             </div>
           )}
         </main>

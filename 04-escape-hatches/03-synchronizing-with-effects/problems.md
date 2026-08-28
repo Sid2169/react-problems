@@ -16,7 +16,7 @@
 - **Problem 2.2:** When fetching data inside an Effect, network responses can arrive out of order if a prop or state variable changes quickly. Explain how returning a cleanup function with a local boolean flag (`let ignore = false;`) solves this race condition.
 - **Problem 2.3:** A developer attempts to stop an Effect from running twice in development by setting `hasRun.current = true` inside a ref. Explain why this "fix" is an anti-pattern and what real-world bug it hides when a user navigates away from and back to the page.
 
-## 3. Code Reading & Prediction Exercises
+## 3. Code Reading & Prediction
 
 ### Problem 3.1: The Infinite Rendering Spiral
 
@@ -241,7 +241,7 @@ export default function VideoConsole(){
 - **Problem 7.1:** If you pass an inline object or inline array directly into a dependency array (e.g., `useEffect(() => {}, [{ id: 1 }])`), what happens on every re-render of the parent component? Explain how React evaluates dependency changes under the hood (`Object.is`).
 - **Problem 7.2:** Why is triggering an analytics event (e.g., `"BUY_BUTTON_CLICKED"`) inside a `useEffect` hook upon state mutation considered an anti-pattern compared to placing it inside the button's `onClick` event handler? Conversely, when *is* an analytics log appropriate inside an Effect?
 
-## 8. Real-World Challenges
+## 8. Real-World Challenge: The Synchronizing With Effects Challenge
 
 ### The Dynamic Live Telemetry Monitor Dashboard
 

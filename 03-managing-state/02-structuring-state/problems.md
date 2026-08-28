@@ -25,7 +25,7 @@
 
 Spot which of the five principles is being violated before checking your reasoning.
 
-**1.**
+### Exercise 3.1: Exercise 3.1
 
 ```jsx
 function Rectangle() {
@@ -42,7 +42,7 @@ function Rectangle() {
 
 Which state variable is redundant here, and what's the risk of keeping it?
 
-**2.**
+### Exercise 3.2: Exercise 3.2
 
 ```jsx
 function Profile({ userId }) {
@@ -53,7 +53,7 @@ function Profile({ userId }) {
 
 Does `id` update to the new `userId`, or keep the original value? Why?
 
-**3.**
+### Exercise 3.3: Exercise 3.3
 
 ```jsx
 function Toggle() {
@@ -74,7 +74,7 @@ function Toggle() {
 
 After calling `reset()`, what combination of `isOn`/`isOff` becomes possible that shouldn't be?
 
-**4.**
+### Exercise 3.4: Exercise 3.4
 
 ```jsx
 function Cart() {
@@ -88,7 +88,7 @@ function Cart() {
 
 If `setProducts` removes the Pen entry, but nobody remembers to also update `totalItems`, what's now true about this component's state that shouldn't be possible?
 
-**5.**
+### Exercise 3.5: Exercise 3.5
 
 ```jsx
 const [user, setUser] = useState({
@@ -104,7 +104,7 @@ function updateCity(newCity) {
 
 Will this actually trigger a visible update on screen? Think about what React compares, not just whether the underlying object technically changed somewhere in memory.
 
-**6.** Hardest — trace a full duplication bug:
+### Exercise 3.6: Exercise 3.6
 
 ```jsx
 function Board() {
@@ -128,7 +128,7 @@ You click to toggle card 1 ("Buy milk") done. Does `activeCard` reflect `done: t
 
 Each snippet has exactly one intentional bug, each tied to one of the five principles.
 
-**1.**
+### Exercise 4.1: Exercise 4.1
 
 ```jsx
 function DraggableBox() {
@@ -144,7 +144,7 @@ function DraggableBox() {
 
 What did the developer forget, and how would grouping `x`/`y` into one `position` state object have made this specific class of mistake harder to write in the first place?
 
-**2.**
+### Exercise 4.2: Exercise 4.2
 
 ```jsx
 function UploadButton() {
@@ -166,7 +166,7 @@ function UploadButton() {
 
 After a failed upload, which two state variables end up `true` at the same time — and why does having three independent booleans make this easy to get wrong, compared to a single `status` field?
 
-**3.**
+### Exercise 4.3: Exercise 4.3
 
 ```jsx
 function ShoppingCart({ items }) {
@@ -182,7 +182,7 @@ function ShoppingCart({ items }) {
 
 Spot the redundant state — what should `itemCount` be replaced with, and why does the current version risk going out of sync even though `handleRemove` looks correct?
 
-**4.**
+### Exercise 4.4: Exercise 4.4
 
 ```jsx
 function Playlist({ songs }) {
@@ -196,7 +196,7 @@ function Playlist({ songs }) {
 
 If you rename the song that's currently playing, does `nowPlaying.title` reflect the new name afterward? Why or why not, and what should be stored in `nowPlaying`'s place to fix it for good?
 
-**5.**
+### Exercise 4.5: Exercise 4.5
 
 ```jsx
 function Avatar({ userId, initialUsername }) {
@@ -210,7 +210,7 @@ The `initial` prefix is the real convention from this lesson — but is it being
 
 No solutions below — write and actually run these.
 
-**1.** Write a `ColorPicker` using a single `color` state object holding `{ hue, saturation }`, both with sensible defaults, updated together through one `setColor` call whenever either value changes.
+### Exercise 5.1: Exercise 5.1
 
 ```jsx
 function ColorPicker() {
@@ -224,7 +224,7 @@ function ColorPicker() {
 }
 ```
 
-**2.** Write a `RequestStatus` component using one `status` state variable (`'idle' | 'loading' | 'success' | 'error'`) instead of three separate booleans. Include a `fetchData` function that transitions through the states correctly, including the error path.
+### Exercise 5.2: Exercise 5.2
 
 ```jsx
 function RequestStatus() {
@@ -232,7 +232,7 @@ function RequestStatus() {
 }
 ```
 
-**3.** Write a `Roster` component with a `players` array in state (each `{ id, name, score }`) and no separate `totalScore` state — derive the total during render instead.
+### Exercise 5.3: Exercise 5.3
 
 ```jsx
 function Roster() {
@@ -240,7 +240,7 @@ function Roster() {
 }
 ```
 
-**4.** Write a `ContactList` with a `contacts` array and a `selectedId` (not a `selectedContact` object) in state. Include a function that returns the currently selected contact by looking it up from `contacts` at render time.
+### Exercise 5.4: Exercise 5.4
 
 ```jsx
 function ContactList() {
@@ -250,7 +250,7 @@ function ContactList() {
 
 ## 6. Modification Exercises
 
-**1.** Merge the two state variables below into one, since they always change together:
+### Exercise 6.1: Exercise 6.1
 
 ```jsx
 function RangeSlider() {
@@ -264,7 +264,7 @@ function RangeSlider() {
 }
 ```
 
-**2.** This form stores redundant state — refactor it so `isValid` is calculated during render instead of stored and manually kept in sync:
+### Exercise 6.2: Exercise 6.2
 
 ```jsx
 function SignupForm() {
@@ -284,7 +284,7 @@ function SignupForm() {
 }
 ```
 
-**3.** This comment tree is deeply nested — flatten it into a normalized `commentsById` shape, following the same pattern the lesson used for the travel plan:
+### Exercise 6.3: Exercise 6.3
 
 ```jsx
 const initialComments = {
@@ -308,7 +308,7 @@ const initialComments = {
 5. A `Set` of `selectedIds` is used in state instead of an array, for fast `.has()` lookups. What's the one thing you must never do directly to a `Set` (or any object) held in state, even though plain JavaScript would technically allow it?
 6. A piece of state could be calculated from other state plus props, but the calculation genuinely is expensive — say, it loops over 100,000 items every render. Does "avoid redundant state" still straightforwardly apply, or does this complicate the advice? (This lesson doesn't hand you the answer directly — reason it out from the principles you do have.)
 
-## 8. Real-World Challenge
+## 8. Real-World Challenge: The Structuring State Challenge
 
 Build a `TaskBoard` component that combines everything above:
 

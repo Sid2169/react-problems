@@ -176,7 +176,7 @@ No solutions below — write and actually run these.
 5. A validation library hands you an `error` prop that could be `undefined`, `null`, or `''` depending on which validator last touched the field. Which of those three actually stop `{error && <p className="error">{error}</p>}` from rendering, and which don't?
 6. Twenty `<Item>`s are rendered in a list; five have `isPacked={true}` and return `null`. If you add `console.log(name)` at the top of `Item`, does it fire for those five? What does your answer say about the difference between "a component renders nothing" and "a component is never called"?
 
-## 8. Real-World Challenge
+## 8. Real-World Challenge: The Conditional Rendering Challenge
 
 Build a `TaskList` for a small todo app. It takes one prop, `tasks`:
 
