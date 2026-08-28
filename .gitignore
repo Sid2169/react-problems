@@ -1,6 +1,7 @@
-# Dependencies
+# Dependencies & Cache
 node_modules/
 .pnpm-store/
+.vite/
 
 # Production build outputs
 dist/
