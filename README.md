@@ -4,6 +4,58 @@ A collection of practice problem sets based on the concepts covered in each arti
 
 The goal is simple: **read an article, then practice the concepts through problems to strengthen understanding and recall.**
 
+---
+
+## ⚡ Quick Start & Workbench Setup
+
+This repository includes an **Interactive React Workbench** powered by Vite with **zero-config auto-discovery**.
+
+### 1. Install Dependencies & Start Dev Server
+```bash
+npm install
+npm run dev
+```
+Open **`http://localhost:3000`** in your browser.
+
+### 2. How to Solve Problems
+
+1. Pick a problem set from the list below and open its `problems.md` (e.g. `./01-describing-ui/01-first-component/problems.md`).
+2. Create a **single solution file** named `Solution.jsx` in the **same directory** beside `problems.md`.
+3. Export your solution components as named or default exports:
+
+```jsx
+// 01-describing-ui/01-first-component/Solution.jsx
+import React from 'react';
+
+// Exercise 5.1
+export function CallToAction() {
+  return (
+    <section className="cta-banner">
+      <h2>Ready to get started?</h2>
+      <button>Join Now</button>
+    </section>
+  );
+}
+
+// Exercise 5.2
+export function LandingPage() {
+  return <div>...</div>;
+}
+
+// Exercise 8 (Main Challenge)
+export default function SaaSLandingPage() {
+  return <div>...</div>;
+}
+```
+
+### 3. View Live Output
+Switch to your browser (`http://localhost:3000`). The Workbench automatically discovers any `Solution.jsx` file in your project:
+- **Sidebar**: Navigate through topics categorized by section.
+- **Export Tabs**: Click any exported exercise component (`CallToAction`, `LandingPage`, `SaaSLandingPage`) to interact with it live on screen.
+- **Hot Reloading**: Any code edits in `Solution.jsx` reload instantly.
+
+---
+
 ## Problem Sets
 
 ### Describing the UI
