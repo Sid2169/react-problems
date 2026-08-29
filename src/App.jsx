@@ -169,25 +169,87 @@ export default function App() {
     };
   }, []);
 
-  // Active selection states
+  // Active selection states with persistence (LocalStorage + URL hash fallback)
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedTopic, setSelectedTopic] = useState(null);
-  const [selectedExport, setSelectedExport] = useState(null);
+  const [selectedTopic, setSelectedTopic] = useState(() => {
+    const hash = typeof window !== 'undefined' ? window.location.hash.replace(/^#/, '').trim() : '';
+    return hash || localStorage.getItem('react_problems_active_topic') || null;
+  });
+  const [selectedExport, setSelectedExport] = useState(() => {
+    return localStorage.getItem('react_problems_active_export') || null;
+  });
 
-  // Default selection on load
+  // Synchronize selection state when categoryList changes or on initial mount
   useEffect(() => {
-    if (categoryList.length > 0) {
-      const firstCat = categoryList[0];
-      setSelectedCategory(firstCat.dir);
-      if (firstCat.topics.length > 0) {
-        const firstTopic = firstCat.topics[0];
-        setSelectedTopic(firstTopic.relTopicPath);
-        if (firstTopic.exports.length > 0) {
-          setSelectedExport(firstTopic.exports[0].name);
+    if (categoryList.length === 0) return;
+
+    const initialTopicPath =
+      selectedTopic ||
+      (typeof window !== 'undefined' ? window.location.hash.replace(/^#/, '').trim() : '') ||
+      localStorage.getItem('react_problems_active_topic');
+
+    let foundCat = null;
+    let foundTopic = null;
+
+    if (initialTopicPath) {
+      for (const cat of categoryList) {
+        const t = cat.topics.find((tp) => tp.relTopicPath === initialTopicPath);
+        if (t) {
+          foundCat = cat;
+          foundTopic = t;
+          break;
         }
       }
     }
+
+    if (!foundCat || !foundTopic) {
+      foundCat = categoryList[0];
+      foundTopic = foundCat?.topics[0] || null;
+    }
+
+    if (foundCat && foundTopic) {
+      setSelectedCategory(foundCat.dir);
+      setSelectedTopic(foundTopic.relTopicPath);
+      localStorage.setItem('react_problems_active_topic', foundTopic.relTopicPath);
+      if (window.location.hash !== `#${foundTopic.relTopicPath}`) {
+        window.history.replaceState(null, '', `#${foundTopic.relTopicPath}`);
+      }
+
+      if (foundTopic.exports.length > 0) {
+        const exportMatch = foundTopic.exports.find((e) => e.name === selectedExport);
+        const exportName = exportMatch ? exportMatch.name : foundTopic.exports[0].name;
+        setSelectedExport(exportName);
+        localStorage.setItem('react_problems_active_export', exportName);
+      } else {
+        setSelectedExport(null);
+      }
+    }
   }, [categoryList]);
+
+  // Listen to browser hash changes (e.g. back/forward navigation or direct links)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace(/^#/, '').trim();
+      if (!hash || hash === selectedTopic) return;
+      for (const cat of categoryList) {
+        const t = cat.topics.find((tp) => tp.relTopicPath === hash);
+        if (t) {
+          setSelectedCategory(cat.dir);
+          setSelectedTopic(t.relTopicPath);
+          localStorage.setItem('react_problems_active_topic', t.relTopicPath);
+          if (t.exports.length > 0) {
+            const expName = t.exports[0].name;
+            setSelectedExport(expName);
+            localStorage.setItem('react_problems_active_export', expName);
+          }
+          break;
+        }
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [categoryList, selectedTopic]);
 
   const activeCategoryObj = useMemo(() => {
     return categoryList.find((c) => c.dir === selectedCategory);
@@ -270,8 +332,14 @@ export default function App() {
                       if (cat.topics.length > 0) {
                         const nextTopic = cat.topics[0];
                         setSelectedTopic(nextTopic.relTopicPath);
+                        localStorage.setItem('react_problems_active_topic', nextTopic.relTopicPath);
+                        window.history.replaceState(null, '', `#${nextTopic.relTopicPath}`);
                         if (nextTopic.exports.length > 0) {
-                          setSelectedExport(nextTopic.exports[0].name);
+                          const expName = nextTopic.exports[0].name;
+                          setSelectedExport(expName);
+                          localStorage.setItem('react_problems_active_export', expName);
+                        } else {
+                          setSelectedExport(null);
                         }
                       }
                     }}
@@ -290,8 +358,14 @@ export default function App() {
                             className={`topic-btn ${selectedTopic === t.relTopicPath ? 'active' : ''}`}
                             onClick={() => {
                               setSelectedTopic(t.relTopicPath);
+                              localStorage.setItem('react_problems_active_topic', t.relTopicPath);
+                              window.history.replaceState(null, '', `#${t.relTopicPath}`);
                               if (t.exports.length > 0) {
-                                setSelectedExport(t.exports[0].name);
+                                const expName = t.exports[0].name;
+                                setSelectedExport(expName);
+                                localStorage.setItem('react_problems_active_export', expName);
+                              } else {
+                                setSelectedExport(null);
                               }
                             }}
                           >
@@ -353,7 +427,10 @@ export default function App() {
                             className={`pill-btn ${
                               (selectedExport || activeTopicObj.exports[0].name) === e.name ? 'active' : ''
                             }`}
-                            onClick={() => setSelectedExport(e.name)}
+                            onClick={() => {
+                              setSelectedExport(e.name);
+                              localStorage.setItem('react_problems_active_export', e.name);
+                            }}
                           >
                             <Play size={12} />
                             <span>{e.name}</span>
